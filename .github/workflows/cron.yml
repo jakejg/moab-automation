@@ -1,0 +1,28 @@
+name: moonflower-lunch
+
+on:
+  schedule:
+    - cron: '0 * * * *'  # Runs every hour
+  workflow_dispatch:  # Allows manual triggering
+
+jobs:
+  run-cron:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4  # Access repo files
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20  # Adjust to your Node.js version
+
+      - name: Install dependencies
+        run: npm install  # Installs packages from package.json
+
+      - name: Compile TypeScript
+        run: npx tsc 
+
+      - name: Run cron script
+        run: node dist/index.js
