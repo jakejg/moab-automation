@@ -1,0 +1,26 @@
+{
+  "name": "lunch-notifier",
+  "version": "1.0.0",
+  "description": "Daily lunch menu notification system",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node src/index.ts"
+  },
+  "dependencies": {
+    "axios": "^1.6.0",
+    "cheerio": "^1.0.0-rc.12",
+    "dotenv": "^16.3.1",
+    "google-auth-library": "^9.15.1",
+    "google-spreadsheet": "^4.1.1",
+    "node-cron": "^3.0.3",
+    "twilio": "^4.19.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.8.10",
+    "@types/node-cron": "^3.0.11",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.2.2"
+  }
+}
