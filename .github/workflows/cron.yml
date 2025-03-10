@@ -2,7 +2,7 @@ name: moonflower-lunch
 
 on:
   schedule:
-    - cron: '0 * * * *'  # Runs every hour
+    # - cron: '0 * * * *' Update when ready 
   workflow_dispatch:  # Allows manual triggering
 
 jobs:
