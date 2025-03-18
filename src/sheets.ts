@@ -1,7 +1,12 @@
 import { GoogleSpreadsheet } from 'google-spreadsheet';
 import { JWT } from 'google-auth-library'
 
-export async function getPhoneNumbers(): Promise<string[]> {
+interface SheetData {
+  phoneNumbers: string[];
+  lunchMessage: string;
+}
+
+export async function getSheetData(): Promise<SheetData> {
   try {
     const SCOPES = [
       'https://www.googleapis.com/auth/spreadsheets',
@@ -19,15 +24,28 @@ export async function getPhoneNumbers(): Promise<string[]> {
     const doc = new GoogleSpreadsheet(process.env.GOOGLE_SHEET_ID!, jwt);
 
     await doc.loadInfo();
-    const sheet = doc.sheetsByIndex[0]; // Assuming phone numbers are in the first sheet
+    const sheet = doc.sheetsByIndex[0];
     const rows = await sheet.getRows();
     
-    // Access the value using get() method
+    // Get phone numbers and lunch info from the sheet
     const phoneNumbers = rows.map(row => row.get('phoneNumber')).filter(Boolean);
-    console.log({phoneNumbers})
-    return phoneNumbers;
+    const lunchInfo = rows.map(row => row.get('lunchInfo')).filter(Boolean);
+    
+    const lunchMessage = createlunchMessage(lunchInfo);
+    console.log({ phoneNumbers, lunchMessage });
+    return { phoneNumbers, lunchMessage };
   } catch (error) {
-    console.error('Error fetching phone numbers:', error);
+    console.error('Error fetching data from sheet:', error);
     throw error;
   }
+}
+
+function createlunchMessage(lunchInfo: string[]) {
+  return `Moonflower's lunch menu: ${lunchInfo.join(', ')}`;
+}
+
+// Keeping this for backward compatibility
+export async function getPhoneNumbers(): Promise<string[]> {
+  const data = await getSheetData();
+  return data.phoneNumbers;
 }
