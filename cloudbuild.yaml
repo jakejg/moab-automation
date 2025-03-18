@@ -18,5 +18,3 @@ steps:
     
 options:
   logging: CLOUD_LOGGING_ONLY
-  build:
-    service_account: 812611363700-compute@developer.gserviceaccount.com
