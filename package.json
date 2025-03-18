@@ -2,13 +2,10 @@
   "name": "lunch-notifier",
   "version": "1.0.0",
   "description": "Daily lunch menu notification system",
-  "main": "dist/index.js",
+  "main": "dist/server.js",
   "scripts": {
     "build": "tsc",
-    "start": "node dist/index.js",
-    "start:server": "ts-node src/index.ts",
-    "start:cron": "ts-node src/cron.ts",
-    "dev": "ts-node src/index.ts"
+    "start:cron": "ts-node src/cron.ts"
   },
   "dependencies": {
     "axios": "^1.6.0",

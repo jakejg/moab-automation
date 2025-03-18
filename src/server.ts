@@ -30,8 +30,10 @@ app.post('/sms', async (req, res) => {
   }
 });
 
-export function startServer() {
-  app.listen(port, () => {
-    console.log(`Server is running on port ${port}`);
-  });
-}
+module.exports = app;
+
+// export function startServer() {
+//   app.listen(port, () => {
+//     console.log(`Server is running on port ${port}`);
+//   });
+// }
