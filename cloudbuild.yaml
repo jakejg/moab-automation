@@ -15,4 +15,8 @@ steps:
           --runtime=nodejs20 \
           --trigger-http \
           --allow-unauthenticated
-          --set-env-vars "GOOGLE_SHEET_ID=${_GOOGLE_SHEET_ID},GOOGLE_SERVICE_ACCOUNT_EMAIL=${_GOOGLE_SERVICE_ACCOUNT_EMAIL},GOOGLE_PRIVATE_KEY=${_GOOGLE_PRIVATE_KEY},TWILIO_ACCOUNT_SID=${_TWILIO_ACCOUNT_SID},TWILIO_AUTH_TOKEN=${_TWILIO_AUTH_TOKEN},TWILIO_PHONE_NUMBER=${_TWILIO_PHONE_NUMBER}"
+    
+options:
+  logging: CLOUD_LOGGING_ONLY
+  build:
+    service_account: 812611363700-compute@developer.gserviceaccount.com
