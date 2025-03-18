@@ -2,6 +2,9 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import MessagingResponse from 'twilio/lib/twiml/MessagingResponse';
 import { getSheetData } from './sheets';
+import { loadGoogleSecrets } from './gcloud-secrets';
+
+loadGoogleSecrets();
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -30,7 +33,7 @@ app.post('/sms', async (req, res) => {
   }
 });
 
-module.exports = app;
+export const sms = app;
 
 // export function startServer() {
 //   app.listen(port, () => {
