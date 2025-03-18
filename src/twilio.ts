@@ -8,7 +8,7 @@ export async function sendMessages(phoneNumbers: string[], message: string): Pro
 
   const sendPromises = phoneNumbers.map(phoneNumber =>
     client.messages.create({
-      body: "Moonflower's lunch menu: " + message,
+      body: message,
       to: phoneNumber,
       from: process.env.TWILIO_PHONE_NUMBER,
     })

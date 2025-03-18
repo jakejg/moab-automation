@@ -10,7 +10,7 @@ export async function runDailyNotification() {
     const { phoneNumbers, lunchMessage } = await getSheetData();
     
     // 2. Send messages to all numbers
-    await sendMessages(phoneNumbers, lunchMessage);
+    // await sendMessages(phoneNumbers, lunchMessage);
     
     console.log('Daily notification completed successfully');
   } catch (error) {

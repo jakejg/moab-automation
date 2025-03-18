@@ -30,7 +30,7 @@ export async function getSheetData(): Promise<SheetData> {
     // Get phone numbers and lunch info from the sheet
     const phoneNumbers = rows.map(row => row.get('phoneNumber')).filter(Boolean);
     const lunchInfo = rows.map(row => row.get('lunchInfo')).filter(Boolean);
-    
+    console.log({lunchInfo})
     const lunchMessage = createlunchMessage(lunchInfo);
     console.log({ phoneNumbers, lunchMessage });
     return { phoneNumbers, lunchMessage };
@@ -41,6 +41,7 @@ export async function getSheetData(): Promise<SheetData> {
 }
 
 function createlunchMessage(lunchInfo: string[]) {
+  
   return `Moonflower's lunch menu: ${lunchInfo.join(', ')}`;
 }
 
