@@ -14,7 +14,8 @@ steps:
           --entry-point=sms \
           --runtime=nodejs20 \
           --trigger-http \
-          --allow-unauthenticated
+          --allow-unauthenticated \
+          --service-account=moonflower-453318@appspot.gserviceaccount.com
     
 options:
   logging: CLOUD_LOGGING_ONLY
