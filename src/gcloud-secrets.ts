@@ -8,7 +8,7 @@ const client = new SecretManagerServiceClient();
 async function getSecret(secretName: string): Promise<string | undefined> {
   // Access secret version from Secret Manager
   const [version] = await client.accessSecretVersion({
-    name: `projects/YOUR_PROJECT_ID/secrets/${secretName}/versions/latest`,
+    name: `projects/moonflower-453318/secrets/${secretName}/versions/latest`,
   });
 
   // Return secret data as string
