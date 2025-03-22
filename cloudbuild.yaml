@@ -19,4 +19,3 @@ steps:
     
 options:
   logging: CLOUD_LOGGING_ONLY
-  serviceAccount: 'cloud-build-sa@moonflower-453318.iam.gserviceaccount.com'
