@@ -5,7 +5,8 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
-    "start": "ts-node src/cron.ts"
+    "start": "ts-node src/cron.ts",
+    "sms": "ts-node src/index.ts"
   },
   "dependencies": {
     "@google-cloud/secret-manager": "^6.0.0",

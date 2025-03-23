@@ -40,3 +40,5 @@ export const sms = app;
 //     console.log(`Server is running on port ${port}`);
 //   });
 // }
+
+// startServer();

@@ -25,10 +25,8 @@ async function getSecret(secretName: string): Promise<string | undefined> {
     process.env.GOOGLE_PRIVATE_KEY = await getSecret('GOOGLE_PRIVATE_KEY');
     process.env.TWILIO_PHONE_NUMBER = await getSecret('TWILIO_PHONE_NUMBER');
 
-    // Now you can use the secrets in your function
     console.log('Secrets successfully loaded.');
 
-    // Your existing code here, for example, handling incoming SMS, etc.
   } catch (error) {
     console.error('Error loading secrets:', error);
   }
