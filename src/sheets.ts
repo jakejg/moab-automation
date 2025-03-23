@@ -31,7 +31,7 @@ export async function getSheetData(): Promise<SheetData> {
     
     // Get phone numbers and lunch info from the sheet
     const phoneNumbers = rows.map(row => row.get('phoneNumber')).filter(Boolean);
-    const lunchInfo = rows.map(row => row.get('lunchInfo')).filter(Boolean);
+    const lunchInfo = rows.map(row => row.get('lunchInfo'));
 
     const lunchMessage = createlunchMessage(lunchInfo);
 
@@ -43,8 +43,8 @@ export async function getSheetData(): Promise<SheetData> {
 }
 
 function createlunchMessage(lunchInfo: string[]) {
-  
-  return `Moonflower's lunch menu: ${lunchInfo.join(', ')}`;
+const paragraph = lunchInfo.map((item) => item == undefined ? '' : item).join('\n');
+return `Moonflower's lunch menu: ${paragraph}`;
 }
 
 // Keeping this for backward compatibility
