@@ -1,8 +1,8 @@
 name: moonflower-lunch
 
 on:
-  # schedule:
-  #   - cron: '0 * * * *'  # Uncomment and update when ready
+  schedule:
+    - cron: '0 19 * * *'  # Runs every day at noon MST
   workflow_dispatch:  # Allows manual triggering
 
 jobs:
