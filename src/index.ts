@@ -19,7 +19,14 @@ app.post('/sms', async (req, res) => {
     const twiml = new MessagingResponse();
 
     // Get lunch info from sheets
-    const { lunchMessage } = await getSheetData();
+    const { lunchMessage, isUpdated } = await getSheetData();
+
+    if (!isUpdated) {
+      console.log('Menu is not updated for the current date. No messages will be sent.');
+      res.writeHead(200, { 'Content-Type': 'text/xml' });
+      res.end(twiml.toString());
+      return;
+    }
 
     // Add message to response
     twiml.message(lunchMessage);

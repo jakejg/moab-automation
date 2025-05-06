@@ -4,6 +4,7 @@ import { JWT } from 'google-auth-library'
 interface SheetData {
   phoneNumbers: string[];
   lunchMessage: string;
+  isUpdated: boolean;
 }
 
 export async function getSheetData(): Promise<SheetData> {
@@ -33,9 +34,20 @@ export async function getSheetData(): Promise<SheetData> {
     const phoneNumbers = rows.map(row => row.get('phoneNumber')).filter(Boolean);
     const lunchInfo = rows.map(row => row.get('lunchInfo'));
 
-    const lunchMessage = createlunchMessage(lunchInfo);
+    const menuDateString = lunchInfo[0] ? lunchInfo[0].toString().trim() : '';
+    const isUpdated = isMenuUpdated(menuDateString);
 
-    return { phoneNumbers, lunchMessage };
+    let lunchMessage = '';
+    if (isUpdated) {
+      lunchMessage = createlunchMessage(lunchInfo);
+    } else {
+      // Optionally, you could set a specific message or leave it empty
+      // if the calling function will handle the !isUpdated case.
+      // For now, we'll make it clear the menu isn't current if we try to create it.
+      console.log('Menu is not for the current date. Not generating lunch message.');
+    }
+
+    return { phoneNumbers, lunchMessage, isUpdated };
   } catch (error) {
     console.error('Error fetching data from sheet:', error);
     throw error;
@@ -43,12 +55,57 @@ export async function getSheetData(): Promise<SheetData> {
 }
 
 function createlunchMessage(lunchInfo: string[]) {
-const paragraph = lunchInfo.map((item) => item == undefined ? '' : item).join('\n');
-return `Moonflower's lunch menu: ${paragraph}`;
+  const paragraph = lunchInfo.map((item) => item == undefined ? '' : item).join('\n');
+  return `Moonflower's lunch menu: ${paragraph}`;
+}
+
+function isMenuUpdated(dateStringFromSheet: string): boolean {
+  if (!dateStringFromSheet) {
+    console.log('Date string from sheet is empty.');
+    return false;
+  }
+
+  // Example dateStringFromSheet: "Tuesday 5/6/25"
+  // We need to parse out "5/6/25"
+  const datePart = dateStringFromSheet.split(' ')[1];
+  if (!datePart) {
+    console.log('Could not parse date part from sheet string:', dateStringFromSheet);
+    return false;
+  }
+
+  const parts = datePart.split('/');
+  if (parts.length !== 3) {
+    console.log('Date part from sheet is not in MM/DD/YY format:', datePart);
+    return false;
+  }
+
+  const month = parseInt(parts[0], 10);
+  const day = parseInt(parts[1], 10);
+  const year = parseInt(parts[2], 10) + 2000; // Assuming YY is for 20YY
+
+  if (isNaN(month) || isNaN(day) || isNaN(year)) {
+    console.log('Could not parse month, day, or year from date part:', datePart);
+    return false;
+  }
+
+  const sheetDate = new Date(year, month - 1, day); // Month is 0-indexed in JS Date
+
+  // Get current date, normalizing to midnight for accurate day comparison
+  const currentDate = new Date();
+  currentDate.setHours(0, 0, 0, 0);
+
+  sheetDate.setHours(0,0,0,0); // Also normalize sheet date to midnight
+
+  console.log('Sheet Date:', sheetDate.toDateString());
+  console.log('Current Date:', currentDate.toDateString());
+
+  return sheetDate.getTime() === currentDate.getTime();
 }
 
 // Keeping this for backward compatibility
 export async function getPhoneNumbers(): Promise<string[]> {
   const data = await getSheetData();
+  // Decide how to handle this if isUpdated is false. 
+  // For now, it still returns phone numbers, but the caller should check isUpdated.
   return data.phoneNumbers;
 }
