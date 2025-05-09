@@ -2,7 +2,7 @@ name: moonflower-lunch
 
 on:
   schedule:
-    - cron: '0 18 * * *'  # Runs every day at noon MST
+    - cron: '50 17 * * *'  # Runs every day at 11:50 MDT
   workflow_dispatch:  # Allows manual triggering
 
 jobs:
