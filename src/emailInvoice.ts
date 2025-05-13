@@ -1,6 +1,9 @@
 import * as nodemailer from 'nodemailer';
 import * as fs from 'fs';
 import * as path from 'path';
+import * as dotenv from 'dotenv';
+
+dotenv.config();
 
 const INVOICE_DATA_FILE = path.join(__dirname, '..', 'invoice_data.json'); // Store in project root
 const EMAIL_TO = process.env.INVOICE_EMAIL_TO || 'your-email@example.com';

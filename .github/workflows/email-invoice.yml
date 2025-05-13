@@ -31,4 +31,5 @@ jobs:
           INVOICE_SMTP_SECURE: ${{ secrets.INVOICE_SMTP_SECURE }} # 'true' or 'false'
           INVOICE_EMAIL_USER: ${{ secrets.INVOICE_EMAIL_USER }}
           INVOICE_EMAIL_PASSWORD: ${{ secrets.INVOICE_EMAIL_PASSWORD }}
+          INVOICE_EMAIL_TO: ${{ secrets.INVOICE_EMAIL_TO }}
         run: npm run email-invoice
