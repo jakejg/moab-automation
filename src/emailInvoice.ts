@@ -8,7 +8,7 @@ dotenv.config();
 const INVOICE_DATA_FILE = path.join(__dirname, '..', 'invoice_data.json'); // Store in project root
 const EMAIL_TO = process.env.INVOICE_EMAIL_TO || 'your-email@example.com';
 const EMAIL_FROM = process.env.INVOICE_EMAIL_USER || 'your-email@example.com'; // Sender email from env variable
-console.log({ EMAIL_TO, EMAIL_FROM })
+
 interface InvoiceData {
     lastInvoiceNumber: number;
 }
