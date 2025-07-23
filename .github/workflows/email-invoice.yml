@@ -33,3 +33,16 @@ jobs:
           INVOICE_EMAIL_PASSWORD: ${{ secrets.INVOICE_EMAIL_PASSWORD }}
           INVOICE_EMAIL_TO: ${{ secrets.INVOICE_EMAIL_TO }}
         run: npm run email-invoice
+
+      - name: Commit and push invoice data
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add invoice_data.json
+          # Commit only if there are changes
+          if ! git diff --staged --quiet; then
+            git commit -m 'Update invoice_data.json'
+            git push
+          else
+            echo "No changes to commit."
+          fi
