@@ -5,7 +5,7 @@ import * as dotenv from 'dotenv';
 
 dotenv.config();
 
-const INVOICE_DATA_FILE = path.join(__dirname, '..', 'invoice_data.json'); // Store in project root
+const INVOICE_DATA_FILE = path.join(process.cwd(), 'invoice_data.json'); // Store in project root
 const EMAIL_TO = process.env.INVOICE_EMAIL_TO || 'your-email@example.com';
 const EMAIL_FROM = process.env.INVOICE_EMAIL_USER || 'your-email@example.com'; // Sender email from env variable
 
@@ -23,12 +23,12 @@ async function getLastInvoiceNumber(): Promise<number> {
             // If the file doesn't exist, create it with a starting number
             const initialData: InvoiceData = { lastInvoiceNumber: 1 };
             fs.writeFileSync(INVOICE_DATA_FILE, JSON.stringify(initialData, null, 2));
-            return 0;
+            return 1;
         }
     } catch (error) {
         console.error('Error reading invoice data file:', error);
     }
-    return 0; // Default if file doesn't exist or is invalid
+    return 1; // Default if file doesn't exist or is invalid
 }
 
 async function saveLastInvoiceNumber(invoiceNumber: number): Promise<void> {
