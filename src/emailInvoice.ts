@@ -19,6 +19,11 @@ async function getLastInvoiceNumber(): Promise<number> {
             const data = fs.readFileSync(INVOICE_DATA_FILE, 'utf-8');
             const jsonData: InvoiceData = JSON.parse(data);
             return jsonData.lastInvoiceNumber || 0;
+        } else {
+            // If the file doesn't exist, create it with a starting number
+            const initialData: InvoiceData = { lastInvoiceNumber: 1 };
+            fs.writeFileSync(INVOICE_DATA_FILE, JSON.stringify(initialData, null, 2));
+            return 0;
         }
     } catch (error) {
         console.error('Error reading invoice data file:', error);
