@@ -42,7 +42,7 @@ const DashboardPage = () => {
       } else {
         setError(data.message || 'An error occurred.');
       }
-    } catch (fetchError) {
+    } catch {
       setError('An unexpected error occurred.');
     }
   };

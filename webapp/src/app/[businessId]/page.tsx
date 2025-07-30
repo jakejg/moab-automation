@@ -1,13 +1,6 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { NextPage } from 'next';
-
-interface SignUpPageProps {
-  params: {
-    businessId: string;
-  };
-}
 
 interface BusinessData {
   businessName: string;
@@ -16,8 +9,12 @@ interface BusinessData {
   complianceText: string;
 }
 
-const SignUpPage: NextPage<SignUpPageProps> = ({ params }) => {
-  const { businessId } = params;
+interface SignUpClientProps {
+  businessId: string;
+}
+
+// This is the Client Component with all the state and logic
+function SignUpClient({ businessId }: SignUpClientProps) {
   const [phone, setPhone] = useState('');
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
@@ -38,19 +35,20 @@ const SignUpPage: NextPage<SignUpPageProps> = ({ params }) => {
           setLoading(false);
         })
         .catch((fetchError) => {
-          setError(fetchError.message);
+          console.error('Failed to fetch business data:', fetchError);
+          setError('Business not found or error fetching data.');
           setLoading(false);
         });
     }
   }, [businessId]);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setMessage('');
 
     try {
-      const res = await fetch('/api/signup', {
+      const res = await fetch('/api/subscribe', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -66,54 +64,57 @@ const SignUpPage: NextPage<SignUpPageProps> = ({ params }) => {
       } else {
         setError(data.message || 'An error occurred.');
       }
-    } catch (err) {
+    } catch {
       setError('An unexpected error occurred.');
     }
   };
 
   if (loading) {
-    return <div className="flex justify-center items-center h-screen">Loading...</div>;
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        Loading...
+      </div>
+    );
   }
 
-  if (error || !businessData) {
-    return <div className="flex justify-center items-center h-screen">Error: {error || 'Business not found'}</div>;
+  if (!businessData) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        Error: Business not found.
+      </div>
+    );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center items-center p-4">
-      <div className="max-w-md w-full bg-white p-8 rounded-lg shadow-md text-center">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">{businessData.headline}</h1>
-        <p className="text-gray-600 mb-6">{businessData.subHeadline}</p>
-        <form className="space-y-6" onSubmit={handleSubmit}>
-          <div>
-            <label htmlFor="phone" className="sr-only">
-              Phone Number
-            </label>
-            <input
-              id="phone"
-              name="phone"
-              type="tel"
-              autoComplete="tel"
-              required
-              className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-              placeholder="Phone Number"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-            />
-          </div>
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 p-4">
+      <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md text-center">
+        <h1 className="text-3xl font-bold text-gray-900">{businessData.headline}</h1>
+        <p className="text-gray-600">{businessData.subHeadline}</p>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <input
+            type="tel"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            placeholder="Enter your phone number"
+            className="w-full px-4 py-2 text-gray-900 bg-gray-100 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          />
           <button
             type="submit"
-            className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            className="w-full px-4 py-2 font-semibold text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
           >
-            Sign Up
+            Subscribe
           </button>
         </form>
-        {message && <p className="mt-4 text-green-600">{message}</p>}
-        {error && <p className="mt-4 text-red-600">{error}</p>}
-        <p className="mt-4 text-xs text-gray-500">{businessData.complianceText}</p>
+        {message && <p className="text-green-600">{message}</p>}
+        {error && <p className="text-red-600">{error}</p>}
+        <p className="text-xs text-gray-500">{businessData.complianceText}</p>
       </div>
     </div>
   );
-};
+}
 
-export default SignUpPage;
+// This is the Server Component that Next.js will render for the page
+export default function SignUpPage({ params }: { params: { businessId: string } }) {
+  return <SignUpClient businessId={params.businessId} />;
+}
