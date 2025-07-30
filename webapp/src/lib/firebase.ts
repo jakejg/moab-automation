@@ -1,27 +1,25 @@
-import { Firestore } from '@google-cloud/firestore';
+// src/lib/firebase.ts
+import * as firebaseClient from 'firebase/app';
+import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
+import { getFirestore } from 'firebase/firestore';
 
-let firestore: Firestore;
+// Parse the Firebase config from the single environment variable.
+const firebaseConfigString = process.env.NEXT_PUBLIC_FIREBASE_CONFIG;
+if (!firebaseConfigString) {
+  throw new Error('NEXT_PUBLIC_FIREBASE_CONFIG is not set in .env.local');
+}
+const firebaseConfig = JSON.parse(firebaseConfigString);
 
-// When running on GCP (like Cloud Run), the library automatically uses the
-// service account associated with the resource. For local development, we use
-// the GOOGLE_APPLICATION_CREDENTIALS_JSON environment variable.
-if (process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON) {
-  console.log('Initializing Firestore with service account credentials for local development.');
-  const serviceAccount = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON);
-  firestore = new Firestore({
-    projectId: serviceAccount.project_id,
-    credentials: {
-      client_email: serviceAccount.client_email,
-      private_key: serviceAccount.private_key,
-    },
-    databaseId: 'moab-automation',
-  });
+// Initialize Firebase
+let app: firebaseClient.FirebaseApp;
+if (!firebaseClient.getApps().length) {
+  app = firebaseClient.initializeApp(firebaseConfig);
 } else {
-  console.log('Initializing Firestore with Application Default Credentials for GCP environment.');
-  // The project ID will be inferred from the GCP environment.
-  firestore = new Firestore({
-    databaseId: 'moab-automation',
-  });
+  app = firebaseClient.getApp();
 }
 
-export { firestore };
+const auth = getAuth(app);
+const firestore = getFirestore(app, 'moab-automation');
+
+// Export the necessary modules for use in other parts of the app
+export { app, auth, firestore, firebaseClient, signInWithEmailAndPassword };

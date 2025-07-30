@@ -1,61 +1,81 @@
-import NextAuth from 'next-auth';
+import NextAuth, { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
-import { firestore } from '@/lib/firebase';
-import bcrypt from 'bcrypt';
+import { auth as authClient, signInWithEmailAndPassword } from '@/lib/firebase'; // Import client SDK for password verification
+import { firestoreAdmin } from '@/lib/firebase-admin'; // Import server-side admin SDK for DB access
 
-const handler = NextAuth({
+const authOptions: NextAuthOptions = {
+  pages: {
+    signIn: '/auth/signin',
+  },
   providers: [
     CredentialsProvider({
-      name: 'Credentials',
+      name: 'credentials',
       credentials: {
-        businessId: { label: 'Business ID', type: 'text' },
-        password: { label: 'Password', type: 'password' },
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" }
       },
       async authorize(credentials) {
-        if (!credentials) {
+        if (!credentials?.email || !credentials?.password) {
           return null;
         }
 
-        const { businessId, password } = credentials;
+        try {
+          // NextAuth doesn't directly integrate with Firebase Auth for password checks.
+          // NextAuth can't directly verify a Firebase Auth password on the server.
+          // The standard pattern is to use the client SDK's `signInWithEmailAndPassword` function.
+          // If it succeeds, the user is valid. If it throws an error, the credentials were bad.
+          const userCredential = await signInWithEmailAndPassword(
+            authClient, // This is the auth instance from the client SDK
+            credentials.email,
+            credentials.password
+          );
 
-        const businessQuery = await firestore.collection('businesses').where('businessId', '==', businessId).limit(1).get();
+          if (userCredential.user) {
+            // Find the corresponding business document to get the businessId
+            const businessesRef = firestoreAdmin.collection('businesses');
+            const snapshot = await businessesRef.where('userId', '==', userCredential.user.uid).limit(1).get();
 
-        if (businessQuery.empty) {
+            if (snapshot.empty) {
+              // This case should ideally not happen if registration is done correctly
+              return null;
+            }
+
+            const businessData = snapshot.docs[0].data();
+
+            return {
+              id: userCredential.user.uid,
+              email: userCredential.user.email,
+              name: businessData.ownerName,
+              businessId: businessData.businessId,
+            };
+          }
+          return null;
+        } catch (error) {
+          // signInWithEmailAndPassword throws an error for invalid credentials
+          console.log('Authorize error:', error);
           return null;
         }
-
-        const business = businessQuery.docs[0].data();
-
-                const passwordMatch = await bcrypt.compare(password, business.password);
-
-        if (passwordMatch) {
-          return { id: business.businessId, name: business.businessName };
-        }
-
-        return null;
       },
     }),
   ],
-  pages: {
-    signIn: '/login',
-  },
-  session: {
-    strategy: 'jwt',
-  },
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user }: { token: any, user: any }) {
       if (user) {
         token.id = user.id;
+        token.businessId = user.businessId;
       }
       return token;
     },
-    async session({ session, token }) {
-      if (session.user && token.id) {
-        session.user.id = token.id as string;
+    async session({ session, token }: { session: any, token: any }) {
+      if (session.user) {
+        session.user.id = token.id;
+        session.user.businessId = token.businessId;
       }
       return session;
     },
   },
-});
+};
+
+const handler = NextAuth(authOptions);
 
 export { handler as GET, handler as POST };

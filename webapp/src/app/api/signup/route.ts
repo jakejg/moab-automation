@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { firestore } from '@/lib/firebase';
+import { firestoreAdmin } from '@/lib/firebase-admin';
 
 export async function POST(request: Request) {
   try {
@@ -10,10 +10,10 @@ export async function POST(request: Request) {
     }
 
         // Save the new subscriber to Firestore
-    await firestore.collection('subscribers').add({
+    await firestoreAdmin.collection('subscribers').add({
       phoneNumber: phone,
       businessId: businessId,
-      status: 'active',
+      status: 'active', 
       signupDate: new Date(),
     });
 
