@@ -9,11 +9,14 @@ declare module 'next-auth' {
     user: {
       /** The user's unique identifier. */
       id: string;
+      /** The associated business identifier. */
+      businessId: string;
     } & DefaultSession['user'];
   }
 
   interface User extends DefaultUser {
     id: string;
+    businessId: string;
   }
 }
 
@@ -22,5 +25,7 @@ declare module 'next-auth/jwt' {
   interface JWT extends DefaultJWT {
     /** The user's unique identifier. */
     id: string;
+    /** The associated business identifier. */
+    businessId: string;
   }
 }

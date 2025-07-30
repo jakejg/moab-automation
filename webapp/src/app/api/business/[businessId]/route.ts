@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 
 export async function GET(
   request: Request,
-  { params }: { params: { businessId: string } }
+  { params }: { params: Promise<{ businessId: string }> }
 ) {
   try {
     const { businessId } = await params;
@@ -31,8 +31,9 @@ export async function GET(
 
     return NextResponse.json(businessData);
 
-  } catch (error: any) {
-    console.error(`Error fetching business '${params.businessId}':`, error);
-    return NextResponse.json({ error: 'Internal Server Error', details: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    console.error(`Error fetching business '${(await params).businessId}':`, error);
+    const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
+    return NextResponse.json({ error: 'Internal Server Error', details: errorMessage }, { status: 500 });
   }
 }

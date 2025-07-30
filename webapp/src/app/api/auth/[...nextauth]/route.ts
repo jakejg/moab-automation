@@ -59,15 +59,15 @@ const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    async jwt({ token, user }: { token: any, user: any }) {
+    jwt({ token, user }) {
       if (user) {
         token.id = user.id;
         token.businessId = user.businessId;
       }
       return token;
     },
-    async session({ session, token }: { session: any, token: any }) {
-      if (session.user) {
+    session({ session, token }) {
+      if (session.user && token.id && token.businessId) {
         session.user.id = token.id;
         session.user.businessId = token.businessId;
       }

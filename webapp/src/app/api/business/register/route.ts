@@ -51,13 +51,18 @@ export async function POST(request: Request) {
         userId: userRecord.uid
     }, { status: 201 });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Registration Error:', error);
-    // Provide more specific error messages based on Firebase error codes
     let errorMessage = 'An unexpected error occurred.';
-    if (error.code === 'auth/email-already-exists') {
-        errorMessage = 'This email address is already in use by another account.';
+    let statusCode = 500;
+
+    if (error && typeof error === 'object' && 'code' in error) {
+        if (error.code === 'auth/email-already-exists') {
+            errorMessage = 'This email address is already in use by another account.';
+            statusCode = 409; // Conflict
+        }
     }
-    return NextResponse.json({ error: errorMessage }, { status: 500 });
+
+    return NextResponse.json({ error: errorMessage }, { status: statusCode });
   }
 }

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { firestore } from '@/lib/firebase';
+import { firestoreAdmin as firestore } from '@/lib/firebase-admin';
 import twilio from 'twilio';
 
 // Initialize Twilio client
