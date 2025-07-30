@@ -2,6 +2,9 @@
 FROM node:20-alpine AS deps
 WORKDIR /app
 
+# Install build tools and compatibility libraries for native modules
+RUN apk add --no-cache libc6-compat build-base python3
+
 # Copy package.json and lock file
 COPY package.json package-lock.json ./
 
