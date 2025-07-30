@@ -9,12 +9,19 @@ interface SignUpPageProps {
   };
 }
 
+interface BusinessData {
+  businessName: string;
+  headline: string;
+  subHeadline: string;
+  complianceText: string;
+}
+
 const SignUpPage: NextPage<SignUpPageProps> = ({ params }) => {
   const { businessId } = params;
   const [phone, setPhone] = useState('');
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
-  const [businessData, setBusinessData] = useState<any>(null);
+  const [businessData, setBusinessData] = useState<BusinessData | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -26,12 +33,12 @@ const SignUpPage: NextPage<SignUpPageProps> = ({ params }) => {
           }
           return res.json();
         })
-        .then((data) => {
+        .then((data: BusinessData) => {
           setBusinessData(data);
           setLoading(false);
         })
-        .catch((err) => {
-          setError(err.message);
+        .catch((fetchError) => {
+          setError(fetchError.message);
           setLoading(false);
         });
     }

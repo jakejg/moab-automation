@@ -18,12 +18,12 @@ const DashboardPage = () => {
     setStatus('');
     setError('');
 
-        if (!session || !(session.user as any)?.id) {
+        if (!session?.user?.id) {
       setError('You must be logged in to send messages.');
       return;
     }
 
-    const businessId = (session.user as any).id;
+    const businessId = session.user.id;
 
     try {
       const res = await fetch('/api/send-message', {
@@ -42,7 +42,7 @@ const DashboardPage = () => {
       } else {
         setError(data.message || 'An error occurred.');
       }
-    } catch (err) {
+    } catch (fetchError) {
       setError('An unexpected error occurred.');
     }
   };
