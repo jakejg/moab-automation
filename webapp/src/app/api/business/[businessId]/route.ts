@@ -11,7 +11,7 @@ export async function GET(
     if (!businessId) {
       return NextResponse.json({ error: 'Business ID is required' }, { status: 400 });
     }
-
+//
     const businessesRef = firestore.collection('businesses');
     const snapshot = await businessesRef
       .where('businessId', '==', businessId)
