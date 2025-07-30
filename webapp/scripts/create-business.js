@@ -34,7 +34,7 @@ const createBusiness = async (businessId, businessName, password, twilioPhoneNum
     // Check if business already exists
     const existingBusiness = await firestore.collection('businesses').where('businessId', '==', businessId).get();
     if (!existingBusiness.empty) {
-      console.error(`Error: Business with ID "${businessId}" already exists.`);
+      console.error(`Error: Business with ID "${businessId}" already exists`);
       return;
     }
 
