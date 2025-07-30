@@ -114,7 +114,8 @@ function SignUpClient({ businessId }: SignUpClientProps) {
   );
 }
 
-// This is the Server Component that Next.js will render for the page
-export default function SignUpPage({ params }: { params: { businessId: string } }) {
-  return <SignUpClient businessId={params.businessId} />;
+// This is the Page (Server Component)
+export default async function Page({ params }: { params: Promise<{ businessId: string }> }) {
+  // We pass the businessId from the server component to the client component
+  return <SignUpClient businessId={(await params).businessId} />;
 }

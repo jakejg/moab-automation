@@ -3,9 +3,10 @@ import { NextResponse } from 'next/server';
 
 export async function GET(
   request: Request,
-  { params: { businessId } }: { params: { businessId: string } }
+  { params }: { params: Promise<{ businessId: string }> }
 ) {
   try {
+    const businessId = (await params).businessId;
 
     if (!businessId) {
       return NextResponse.json({ error: 'Business ID is required' }, { status: 400 });

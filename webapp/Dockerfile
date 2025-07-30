@@ -1,18 +1,16 @@
 # 1. Install dependencies
-FROM node:20-alpine AS deps
+FROM node:20-slim AS deps
 WORKDIR /app
 
-# Install build tools and compatibility libraries for native modules
-RUN apk add --no-cache libc6-compat build-base python3
 
-# Copy package.json and lock file
-COPY package.json package-lock.json ./
+# Copy package.json
+COPY package.json ./
 
 # Install dependencies
-RUN npm ci
+RUN npm install
 
 # 2. Build the application
-FROM node:20-alpine AS builder
+FROM node:20-slim AS builder
 WORKDIR /app
 
 # Copy dependencies from the 'deps' stage
@@ -28,7 +26,7 @@ ENV NEXT_TELEMETRY_DISABLED 1
 RUN npm run build
 
 # 3. Production image
-FROM node:20-alpine AS runner
+FROM node:20-slim AS runner
 WORKDIR /app
 
 # Set NEXT_TELEMETRY_DISABLED to 1 for the production environment
