@@ -39,8 +39,12 @@ export default function SignUpClient({ businessId }: SignUpClientProps) {
           throw new Error(data.error || 'Failed to fetch business data.');
         }
         setBusiness(data);
-      } catch (err: any) {
-        setError(err.message);
+      } catch (err: unknown) {
+        if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError('An unknown error occurred.');
+        }
       } finally {
         setLoading(false);
       }
@@ -63,8 +67,12 @@ export default function SignUpClient({ businessId }: SignUpClientProps) {
       if (!response.ok) throw new Error(result.error || 'An unknown error occurred.');
       setMessage('Success! You are on the list.');
       setPhone('');
-    } catch (err: any) {
-      setSubmitError(err.message);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setSubmitError(err.message);
+      } else {
+        setSubmitError('An unknown error occurred.');
+      }
     }
   };
 

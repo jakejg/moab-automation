@@ -67,11 +67,12 @@ const authOptions: NextAuthOptions = {
       return token;
     },
     session({ session, token }) {
-      if (session.user && token.id && token.businessId) {
-        session.user.id = token.id;
-        session.user.businessId = token.businessId;
+      const newSession = { ...session };
+      if (token && newSession.user) {
+        newSession.user.id = token.id as string;
+        newSession.user.businessId = token.businessId as string;
       }
-      return session;
+      return newSession;
     },
   },
 };
