@@ -46,8 +46,8 @@ steps:
           --region=us-central1 \
           --platform=managed \
           --allow-unauthenticated \
-          --set-secrets=TWILIO_ACCOUNT_SID=twilio-account-sid:latest,TWILIO_AUTH_TOKEN=twilio-auth-token:latest,NEXTAUTH_SECRET=nextauth-secret:latest \
-          --set-env-vars=NEXTAUTH_URL=https://moab-automation-webapp-812611363700.us-central1.run.app
+          --set-secrets=TWILIO_ACCOUNT_SID=twilio-account-sid:latest,TWILIO_AUTH_TOKEN=twilio-auth-token:latest,NEXTAUTH_SECRET=nextauth-secret:latest,NEXT_PUBLIC_FIREBASE_CONFIG=next-public-firebase-config:latest \
+          --set-env-vars=NEXT_PUBLIC_FIREBASE_PROJECT_ID=moonflower-453318,NEXTAUTH_URL=https://moab-automation-webapp-812611363700.us-central1.run.app
 
 # Tell Cloud Build to push the built image to Artifact Registry
 images:
