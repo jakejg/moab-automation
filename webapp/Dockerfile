@@ -13,6 +13,13 @@ RUN npm install
 FROM node:20-slim AS builder
 WORKDIR /app
 
+# Declare a build argument to receive the Firebase config from Cloud Build
+ARG NEXT_PUBLIC_FIREBASE_CONFIG
+
+# Set it as an environment variable that Next.js will pick up during the build process
+# This makes it available to your `npm run build` command
+ENV NEXT_PUBLIC_FIREBASE_CONFIG=${NEXT_PUBLIC_FIREBASE_CONFIG}
+
 # Copy dependencies from the 'deps' stage
 COPY --from=deps /app/node_modules ./node_modules
 
