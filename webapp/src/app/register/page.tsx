@@ -43,12 +43,8 @@ export default function RegisterPage() {
       setEmail('');
       setPassword('');
 
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError('An unexpected error occurred.');
-      }
+    } catch (err: any) {
+      setError(err.message);
     }
   };
 

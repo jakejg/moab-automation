@@ -27,8 +27,7 @@ export default function SignInPage() {
         // On successful login, redirect to the dashboard.
         router.push('/dashboard');
       }
-    } catch {
-
+    } catch (err) {
       setError('An unexpected error occurred. Please try again later.');
     }
   };
