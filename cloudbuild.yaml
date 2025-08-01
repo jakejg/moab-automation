@@ -1,7 +1,7 @@
 availableSecrets:
   secretManager:
   - versionName: projects/$PROJECT_ID/secrets/next-public-firebase-config/versions/latest
-    env: 'FIREBASE_CONFIG_SECRET_VALUE' # This will be an internal Cloud Build environment variable
+    env: '_FIREBASE_CONFIG_SECRET_VALUE' # This will be an internal Cloud Build environment variable
 
 steps:
 # Step 1: Deploy the 'sms' Cloud Function (existing step)
@@ -36,9 +36,9 @@ steps:
         docker build \
           -t us-central1-docker.pkg.dev/$PROJECT_ID/webapp-repo/moab-automation-webapp:$COMMIT_SHA \
           . \
-          --build-arg NEXT_PUBLIC_FIREBASE_CONFIG="${FIREBASE_CONFIG_SECRET_VALUE}"
+          --build-arg NEXT_PUBLIC_FIREBASE_CONFIG="${_FIREBASE_CONFIG_SECRET_VALUE}"
     dir: 'webapp' # Run this step in the webapp directory
-    secretEnv: ['FIREBASE_CONFIG_SECRET_VALUE']
+    secretEnv: ['_FIREBASE_CONFIG_SECRET_VALUE']
 
   - name: 'gcr.io/cloud-builders/docker'
     id: 'Push webapp container image'
