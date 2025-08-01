@@ -1,6 +1,6 @@
 availableSecrets:
   secretManager:
-  - versionName: projects/$PROJECT_ID/secrets/next-public-firebase-config/versions/latest
+  - versionName: projects/moonflower-453318/secrets/next-public-firebase-config/versions/latest
     env: '_FIREBASE_CONFIG_SECRET_VALUE' # This will be an internal Cloud Build environment variable
 
 steps:
