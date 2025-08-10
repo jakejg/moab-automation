@@ -50,7 +50,7 @@ const DashboardPage = () => {
   }
 
   if (sessionStatus === 'unauthenticated') {
-    router.push('/login');
+    router.push('/auth/signin');
     return null;
   }
 

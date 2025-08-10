@@ -125,7 +125,7 @@ export default function RegisterPage() {
             <div>
                 <p className="mt-4 text-center text-green-500 text-xs">{success}</p>
                 <div className="text-center mt-4">
-                    <Link href="/api/auth/signin" className="font-bold text-blue-600 hover:text-blue-800">
+                    <Link href="/auth/signin" className="font-bold text-blue-600 hover:text-blue-800">
                         Go to Login Page
                     </Link>
                 </div>

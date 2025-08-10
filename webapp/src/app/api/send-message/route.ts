@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { firestoreAdmin as firestore } from '@/lib/firebase-admin';
 import twilio from 'twilio';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '../auth/[...nextauth]/route';
+import { authOptions } from '../auth/[...nextauth]/authOptions';
 
 function getTwilioClient() {
   const sid = process.env.TWILIO_ACCOUNT_SID;

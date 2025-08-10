@@ -2,14 +2,14 @@ import { firestoreAdmin } from '@/lib/firebase-admin';
 import { NextResponse } from 'next/server';
 
 // Helper function to convert a business name to URL-friendly format
-function toUrlFriendly(name: string): string {
-  return name
-    .toLowerCase()
-    .replace(/[^\w\s-]/g, '') // Remove special characters
-    .replace(/\s+/g, '-')      // Replace spaces with hyphens
-    .replace(/-+/g, '-')       // Replace multiple hyphens with single
-    .trim();
-}
+// function toUrlFriendly(name: string): string {
+//   return name
+//     .toLowerCase()
+//     .replace(/[^\w\s-]/g, '') // Remove special characters
+//     .replace(/\s+/g, '-')      // Replace spaces with hyphens
+//     .replace(/-+/g, '-')       // Replace multiple hyphens with single
+//     .trim();
+// }
 
 export async function GET(
   request: Request,
