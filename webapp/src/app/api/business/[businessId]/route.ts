@@ -1,6 +1,16 @@
 import { firestoreAdmin } from '@/lib/firebase-admin';
 import { NextResponse } from 'next/server';
 
+// Helper function to convert a business name to URL-friendly format
+function toUrlFriendly(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/[^\w\s-]/g, '') // Remove special characters
+    .replace(/\s+/g, '-')      // Replace spaces with hyphens
+    .replace(/-+/g, '-')       // Replace multiple hyphens with single
+    .trim();
+}
+
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ businessId: string }> }
@@ -12,11 +22,23 @@ export async function GET(
       return NextResponse.json({ error: 'Business ID is required' }, { status: 400 });
     }
 
-    const businessDocRef = firestoreAdmin.collection('businesses').doc(businessId);
-    const businessDocSnap = await businessDocRef.get();
-//
-    if (!businessDocSnap.exists) {
-      return NextResponse.json({ error: 'Business not found' }, { status: 404 });
+    // First try to find by URL-friendly name
+    const businessesRef = firestoreAdmin.collection('businesses');
+    const querySnapshot = await businessesRef
+      .where('urlName', '==', businessId)
+      .limit(1)
+      .get();
+
+    let businessDocSnap;
+    
+    // If not found by URL name, try by document ID
+    if (querySnapshot.empty) {
+      businessDocSnap = await businessesRef.doc(businessId).get();
+      if (!businessDocSnap.exists) {
+        return NextResponse.json({ error: 'Business not found' }, { status: 404 });
+      }
+    } else {
+      businessDocSnap = querySnapshot.docs[0];
     }
 
     const businessData = businessDocSnap.data();

@@ -23,15 +23,13 @@ const DashboardPage = () => {
       return;
     }
 
-    const businessId = session.user.id;
-
     try {
       const res = await fetch('/api/send-message', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ message, businessId }),
+        body: JSON.stringify({ message }),
       });
 
       const data = await res.json();

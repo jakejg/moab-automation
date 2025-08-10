@@ -3,7 +3,7 @@ import CredentialsProvider from 'next-auth/providers/credentials';
 import { auth as authClient, signInWithEmailAndPassword } from '@/lib/firebase'; // Import client SDK for password verification
 import { firestoreAdmin } from '@/lib/firebase-admin'; // Import server-side admin SDK for DB access
 
-const authOptions: NextAuthOptions = {
+export const authOptions: NextAuthOptions = {
   pages: {
     signIn: '/auth/signin',
   },
@@ -47,6 +47,7 @@ const authOptions: NextAuthOptions = {
               email: userCredential.user.email,
               name: businessData.ownerName,
               businessId: businessData.businessId,
+              businessUrlName: businessData.urlName,
             };
           }
           return null;
@@ -59,10 +60,11 @@ const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    jwt({ token, user }) {
+    async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
         token.businessId = user.businessId;
+        token.businessUrlName = user.businessUrlName;
       }
       return token;
     },
@@ -71,6 +73,7 @@ const authOptions: NextAuthOptions = {
       if (token && newSession.user) {
         newSession.user.id = token.id as string;
         newSession.user.businessId = token.businessId as string;
+        newSession.user.businessUrlName = token.businessUrlName as string;
       }
       return newSession;
     },
