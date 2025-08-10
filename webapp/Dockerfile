@@ -20,6 +20,12 @@ ARG NEXT_PUBLIC_FIREBASE_CONFIG
 # This makes it available to your `npm run build` command
 ENV NEXT_PUBLIC_FIREBASE_CONFIG=${NEXT_PUBLIC_FIREBASE_CONFIG}
 
+# --- TEMPORARY DEBUGGING STEP ---
+RUN echo "DEBUG: NEXT_PUBLIC_FIREBASE_CONFIG is: ${NEXT_PUBLIC_FIREBASE_CONFIG}"
+# If the above line prints an empty or undefined value, then the problem is
+# with the ARG/ENV setup or the value not reaching the Docker build.
+# --- END TEMPORARY DEBUGGING STEP ---
+
 # Copy dependencies from the 'deps' stage
 COPY --from=deps /app/node_modules ./node_modules
 
