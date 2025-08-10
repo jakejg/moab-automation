@@ -13,8 +13,18 @@ RUN npm install
 FROM node:20-slim AS builder
 WORKDIR /app
 
-# Declare a build argument to receive the Firebase config from Cloud Build
+# Client-side Firebase config
 ARG NEXT_PUBLIC_FIREBASE_CONFIG
+ENV NEXT_PUBLIC_FIREBASE_CONFIG=${NEXT_PUBLIC_FIREBASE_CONFIG}
+
+# Server-side Firebase Admin config
+ARG NEXT_PUBLIC_FIREBASE_PROJECT_ID
+ENV NEXT_PUBLIC_FIREBASE_PROJECT_ID=${NEXT_PUBLIC_FIREBASE_PROJECT_ID}
+ARG FIREBASE_CLIENT_EMAIL
+ENV FIREBASE_CLIENT_EMAIL=${FIREBASE_CLIENT_EMAIL}
+ARG FIREBASE_PRIVATE_KEY
+ENV FIREBASE_PRIVATE_KEY=${FIREBASE_PRIVATE_KEY}
+
 
 # Set it as an environment variable that Next.js will pick up during the build process
 # This makes it available to your `npm run build` command
