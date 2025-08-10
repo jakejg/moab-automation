@@ -71,19 +71,12 @@ steps:
           TWILIO_TOKEN_SECRET="TWILIO_AUTH_TOKEN_DEV"
         fi
 
-         # --- TEMPORARY DEBUGGING STEP ---
-        echo "Validating access to secret: $$TWILIO_SID_SECRET"
-        gcloud secrets describe $$TWILIO_SID_SECRET
-        echo "Validating access to secret: $$TWILIO_TOKEN_SECRET"
-        gcloud secrets describe $$TWILIO_TOKEN_SECRET
-        # --- END TEMPORARY DEBUGGING STEP ---
-
         gcloud run deploy $$SERVICE_NAME \
           --image=us-central1-docker.pkg.dev/$PROJECT_ID/webapp-repo/moab-automation-webapp:$COMMIT_SHA \
           --region=us-central1 \
           --platform=managed \
           --allow-unauthenticated \
-          --set-secrets=TWILIO_ACCOUNT_SID=$$TWILIO_SID_SECRET:latest,TWILIO_AUTH_TOKEN=$$TWILIO_TOKEN_SECRET:latest,NEXTAUTH_SECRET=NEXTAUTH_SECRET:latest,NEXT_PUBLIC_FIREBASE_CONFIG=NEXT_PUBLIC_FIREBASE_CONFIG:latest,FIREBASE_CLIENT_EMAIL=FIREBASE_CLIENT_EMAIL:latest,FIREBASE_PRIVATE_KEY=FIREBASE_PRIVATE_KEY:latest \
+          --set-secrets=TWILIO_ACCOUNT_SID=$$TWILIO_SID_SECRET:latest:TWILIO_ACCOUNT_SID,TWILIO_AUTH_TOKEN=$$TWILIO_TOKEN_SECRET:latest:TWILIO_AUTH_TOKEN,NEXTAUTH_SECRET=NEXTAUTH_SECRET:latest,NEXT_PUBLIC_FIREBASE_CONFIG=NEXT_PUBLIC_FIREBASE_CONFIG:latest,FIREBASE_CLIENT_EMAIL=FIREBASE_CLIENT_EMAIL:latest,FIREBASE_PRIVATE_KEY=FIREBASE_PRIVATE_KEY:latest \
           --set-env-vars=NEXT_PUBLIC_FIREBASE_PROJECT_ID=moonflower-453318,NEXTAUTH_URL=$$SERVICE_URL
 
 
