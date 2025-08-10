@@ -71,7 +71,7 @@ steps:
           TWILIO_TOKEN_SECRET="TWILIO_AUTH_TOKEN_DEV"
         fi
 
-       gcloud run deploy $$SERVICE_NAME \
+        gcloud run deploy $$SERVICE_NAME \
           --image=us-central1-docker.pkg.dev/$PROJECT_ID/webapp-repo/moab-automation-webapp:$COMMIT_SHA \
           --region=us-central1 \
           --platform=managed \
