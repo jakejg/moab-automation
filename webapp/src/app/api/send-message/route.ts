@@ -2,6 +2,10 @@ import { NextResponse } from 'next/server';
 import { firestoreAdmin as firestore } from '@/lib/firebase-admin';
 import twilio from 'twilio';
 
+if (!process.env.TWILIO_ACCOUNT_SID || !process.env.TWILIO_AUTH_TOKEN) {
+  throw new Error('TWILIO_ACCOUNT_SID or TWILIO_AUTH_TOKEN not found in environment variables');
+}
+
 // Initialize Twilio client
 const twilioClient = twilio(
   process.env.TWILIO_ACCOUNT_SID,
