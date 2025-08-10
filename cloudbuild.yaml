@@ -38,6 +38,7 @@ steps:
       - '-c'
       - |
         docker build \
+          --no-cache \
           --build-arg "NEXT_PUBLIC_FIREBASE_CONFIG=$${NEXT_PUBLIC_FIREBASE_CONFIG}" \
           --build-arg "NEXT_PUBLIC_FIREBASE_PROJECT_ID=moonflower-453318" \
           --build-arg "FIREBASE_CLIENT_EMAIL=$${FIREBASE_CLIENT_EMAIL}" \
@@ -69,6 +70,14 @@ steps:
           TWILIO_SID_SECRET="TWILIO_ACCOUNT_SID_DEV"
           TWILIO_TOKEN_SECRET="TWILIO_AUTH_TOKEN_DEV"
         fi
+
+         # --- TEMPORARY DEBUGGING STEP ---
+        echo "Validating access to secret: $$TWILIO_SID_SECRET"
+        gcloud secrets describe $$TWILIO_SID_SECRET
+        echo "Validating access to secret: $$TWILIO_TOKEN_SECRET"
+        gcloud secrets describe $$TWILIO_TOKEN_SECRET
+        # --- END TEMPORARY DEBUGGING STEP ---
+
         gcloud run deploy $$SERVICE_NAME \
           --image=us-central1-docker.pkg.dev/$PROJECT_ID/webapp-repo/moab-automation-webapp:$COMMIT_SHA \
           --region=us-central1 \
