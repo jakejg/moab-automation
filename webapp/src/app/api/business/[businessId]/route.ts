@@ -14,7 +14,7 @@ export async function GET(
 
     const businessDocRef = firestoreAdmin.collection('businesses').doc(businessId);
     const businessDocSnap = await businessDocRef.get();
-
+//
     if (!businessDocSnap.exists) {
       return NextResponse.json({ error: 'Business not found' }, { status: 404 });
     }
