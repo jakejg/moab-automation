@@ -1,43 +1,44 @@
 availableSecrets:
   secretManager:
   - versionName: projects/812611363700/secrets/NEXT_PUBLIC_FIREBASE_CONFIG/versions/latest
-    env: '_FIREBASE_CONFIG_SECRET_VALUE' # This will be an internal Cloud Build environment variable
+    env: 'NEXT_PUBLIC_FIREBASE_CONFIG' # This will be an internal Cloud Build environment variable
 
 steps:
-# Step 1: Deploy the 'sms' Cloud Function (existing step)
-  - name: 'gcr.io/cloud-builders/npm'
-    id: 'Install dependencies for SMS function'
-    args: ['install']
+# # Step 1: Deploy the 'sms' Cloud Function (existing step)
+#   - name: 'gcr.io/cloud-builders/npm'
+#     id: 'Install dependencies for SMS function'
+#     args: ['install']
 
-  - name: 'gcr.io/cloud-builders/npm'
-    id: 'Build SMS function'
-    args: ['run', 'build']
+#   - name: 'gcr.io/cloud-builders/npm'
+#     id: 'Build SMS function'
+#     args: ['run', 'build']
 
-  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-    id: 'Deploy SMS function'
-    entrypoint: 'bash'
-    args:
-      - '-c'
-      - |
-        gcloud functions deploy sms \
-          --entry-point=sms \
-          --runtime=nodejs20 \
-          --trigger-http \
-          --allow-unauthenticated \
-          --service-account=moonflower-453318@appspot.gserviceaccount.com
+#   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+#     id: 'Deploy SMS function'
+#     entrypoint: 'bash'
+#     args:
+#       - '-c'
+#       - |
+#         gcloud functions deploy sms \
+#           --entry-point=sms \
+#           --runtime=nodejs20 \
+#           --trigger-http \
+#           --allow-unauthenticated \
+#           --service-account=moonflower-453318@appspot.gserviceaccount.com
 
     # Step 2: Build and deploy the Next.js web application
   - name: 'gcr.io/cloud-builders/docker'
     id: 'Build webapp container image'
     args:
       - 'build'
+      - '--no-cache'
       - '--build-arg'
-      - 'NEXT_PUBLIC_FIREBASE_CONFIG=${_FIREBASE_CONFIG_SECRET_VALUE}'
+      - 'NEXT_PUBLIC_FIREBASE_CONFIG=${NEXT_PUBLIC_FIREBASE_CONFIG}'
       - '-t'
       - 'us-central1-docker.pkg.dev/$PROJECT_ID/webapp-repo/moab-automation-webapp:$COMMIT_SHA'
       - '.'
     dir: 'webapp' # Run this step in the webapp directory
-    secretEnv: ['_FIREBASE_CONFIG_SECRET_VALUE']
+    secretEnv: ['NEXT_PUBLIC_FIREBASE_CONFIG']
 
   - name: 'gcr.io/cloud-builders/docker'
     id: 'Push webapp container image'
