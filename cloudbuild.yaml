@@ -46,7 +46,8 @@ steps:
           -t "us-central1-docker.pkg.dev/$PROJECT_ID/webapp-repo/moab-automation-webapp:$COMMIT_SHA" \
           .
     dir: 'webapp' # Run this step in the webapp directory
-    secretEnv: ['NEXT_PUBLIC_FIREBASE_CONFIG']
+    secretEnv: ['NEXT_PUBLIC_FIREBASE_CONFIG','FIREBASE_CLIENT_EMAIL','FIREBASE_PRIVATE_KEY','NEXT_PUBLIC_FIREBASE_PROJECT_ID']
+
 
   - name: 'gcr.io/cloud-builders/docker'
     id: 'Push webapp container image'
