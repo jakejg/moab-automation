@@ -2,18 +2,21 @@ import { NextResponse } from 'next/server';
 import { firestoreAdmin as firestore } from '@/lib/firebase-admin';
 import twilio from 'twilio';
 
-if (!process.env.TWILIO_ACCOUNT_SID || !process.env.TWILIO_AUTH_TOKEN) {
-  throw new Error('TWILIO_ACCOUNT_SID or TWILIO_AUTH_TOKEN not found in environment variables');
+function getTwilioClient() {
+  const sid = process.env.TWILIO_ACCOUNT_SID;
+  const token = process.env.TWILIO_AUTH_TOKEN;
+
+  if (!sid || !token) {
+    throw new Error('Missing Twilio credentials in environment variables');
+  }
+
+  return twilio(sid, token);
 }
 
-// Initialize Twilio client
-const twilioClient = twilio(
-  process.env.TWILIO_ACCOUNT_SID,
-  process.env.TWILIO_AUTH_TOKEN
-);
 
 export async function POST(request: Request) {
   try {
+    const twilioClient = getTwilioClient();
     const { message, businessId } = await request.json();
 
     if (!message || !businessId) {
