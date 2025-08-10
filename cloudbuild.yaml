@@ -40,26 +40,9 @@ steps:
         docker build \
           --no-cache \
           --build-arg "NEXT_PUBLIC_FIREBASE_CONFIG=$${NEXT_PUBLIC_FIREBASE_CONFIG}" \
-          availableSecrets:
-  secretManager:
-  - versionName: projects/812611363700/secrets/NEXT_PUBLIC_FIREBASE_CONFIG/versions/latest
-    env: 'NEXT_PUBLIC_FIREBASE_CONFIG'
-  - versionName: projects/812611363700/secrets/FIREBASE_CLIENT_EMAIL/versions/latest
-    env: 'FIREBASE_CLIENT_EMAIL'
-  - versionName: projects/812611363700/secrets/FIREBASE_PRIVATE_KEY/versions/latest
-    env: 'FIREBASE_PRIVATE_KEY'
-
-steps:
-{{ ... }}
-    args:
-      - '-c'
-      - |
-        docker build \
-          --no-cache \
           --build-arg "NEXT_PUBLIC_FIREBASE_PROJECT_ID=moonflower-453318" \
           --build-arg "FIREBASE_CLIENT_EMAIL=$${FIREBASE_CLIENT_EMAIL}" \
           --build-arg "FIREBASE_PRIVATE_KEY=$${FIREBASE_PRIVATE_KEY}" \
-          --build-arg "NEXT_PUBLIC_FIREBASE_CONFIG=$${NEXT_PUBLIC_FIREBASE_CONFIG}" \
           -t "us-central1-docker.pkg.dev/$PROJECT_ID/webapp-repo/moab-automation-webapp:$COMMIT_SHA" \
           .
     dir: 'webapp' # Run this step in the webapp directory
