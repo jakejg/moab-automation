@@ -38,7 +38,6 @@ steps:
       - '-c'
       - |
         docker build \
-          --no-cache \
           --build-arg "NEXT_PUBLIC_FIREBASE_CONFIG=$${NEXT_PUBLIC_FIREBASE_CONFIG}" \
           --build-arg "NEXT_PUBLIC_FIREBASE_PROJECT_ID=moonflower-453318" \
           --build-arg "FIREBASE_CLIENT_EMAIL=$${FIREBASE_CLIENT_EMAIL}" \
