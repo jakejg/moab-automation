@@ -1,29 +1,88 @@
 import { NextResponse } from 'next/server';
 import { firestoreAdmin as firestore } from '@/lib/firebase-admin';
 import twilio from 'twilio';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '../auth/[...nextauth]/authOptions';
 
-// Initialize Twilio client
-const twilioClient = twilio(
-  process.env.TWILIO_ACCOUNT_SID,
-  process.env.TWILIO_AUTH_TOKEN
-);
+function getTwilioClient() {
+  const sid = process.env.TWILIO_ACCOUNT_SID;
+  const token = process.env.TWILIO_AUTH_TOKEN;
+
+  if (!sid || !token) {
+    throw new Error('Missing Twilio credentials in environment variables');
+  }
+
+  return twilio(sid, token);
+}
+
+
+interface SessionUser {
+  id: string;
+  email: string;
+  name: string;
+  businessId: string;
+}
 
 export async function POST(request: Request) {
   try {
-    const { message, businessId } = await request.json();
-
-    if (!message || !businessId) {
-      return NextResponse.json({ message: 'Message and business ID are required.' }, { status: 400 });
+    const twilioClient = getTwilioClient();
+    const { message } = await request.json();
+    const session = await getServerSession(authOptions);
+    
+    // 1. Validate request
+    if (!message) {
+      return NextResponse.json(
+        { message: 'Message is required.' }, 
+        { status: 400 }
+      );
     }
 
-    // 1. Fetch business details to get the Twilio phone number
-    const businessQuery = await firestore.collection('businesses').where('businessId', '==', businessId).limit(1).get();
-
-    if (businessQuery.empty) {
-      return NextResponse.json({ message: 'Business not found.' }, { status: 404 });
+    // 2. Verify user is authenticated and has a business
+    if (!session?.user) {
+      return NextResponse.json(
+        { message: 'Unauthorized: Please log in.' },
+        { status: 401 }
+      );
     }
 
-    const businessData = businessQuery.docs[0].data();
+    const user = session.user as SessionUser;
+    const businessId = user.businessId;
+    
+    if (!businessId) {
+      return NextResponse.json(
+        { message: 'No business associated with this account.' },
+        { status: 403 }
+      );
+    }
+    console.log(`User ${user.id} attempting to send message for business ${businessId}`);
+
+    // 3. Verify business exists
+    const businessDoc = await firestore.collection('businesses').doc(businessId).get();
+    
+    if (!businessDoc.exists) {
+      return NextResponse.json(
+        { message: 'Business not found.' }, 
+        { status: 404 }
+      );
+    }
+
+    const businessData = businessDoc.data();
+    
+    if (!businessData) {
+      return NextResponse.json(
+        { message: 'Business data is corrupted.' },
+        { status: 500 }
+      );
+    }
+
+    // 4. Verify the business belongs to the user
+    if (businessData.userId !== user.id) {
+      return NextResponse.json(
+        { message: 'Unauthorized: You do not have permission to send messages for this business.' },
+        { status: 403 }
+      );
+    }
+
     const twilioPhoneNumber = businessData.twilioPhoneNumber;
 
     if (!twilioPhoneNumber) {

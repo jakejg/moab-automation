@@ -12,7 +12,7 @@ export default function Home() {
           <Link href="/register" className="inline-block rounded-md bg-blue-600 px-6 py-3 text-lg font-semibold text-white shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
             Register Your Business
           </Link>
-          <Link href="/api/auth/signin" className="inline-block rounded-md bg-white px-6 py-3 text-lg font-semibold text-gray-800 shadow-md ring-1 ring-inset ring-gray-300 hover:bg-gray-100">
+          <Link href="/auth/signin" className="inline-block rounded-md bg-white px-6 py-3 text-lg font-semibold text-gray-800 shadow-md ring-1 ring-inset ring-gray-300 hover:bg-gray-100">
             Business Login
           </Link>
         </div>

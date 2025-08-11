@@ -38,6 +38,7 @@ steps:
       - '-c'
       - |
         docker build \
+          --no-cache \
           --build-arg "NEXT_PUBLIC_FIREBASE_CONFIG=$${NEXT_PUBLIC_FIREBASE_CONFIG}" \
           --build-arg "NEXT_PUBLIC_FIREBASE_PROJECT_ID=moonflower-453318" \
           --build-arg "FIREBASE_CLIENT_EMAIL=$${FIREBASE_CLIENT_EMAIL}" \
@@ -58,13 +59,27 @@ steps:
     args:
       - '-c'
       - |
-        gcloud run deploy moab-automation-webapp \
+        if [ "$BRANCH_NAME" = "main" ]; then
+          SERVICE_NAME="moab-automation-webapp"
+          SERVICE_URL="https://moab-automation-webapp-812611363700.us-central1.run.app"
+          TWILIO_SID_SECRET="TWILIO_ACCOUNT_SID"
+          TWILIO_TOKEN_SECRET="TWILIO_AUTH_TOKEN"
+        else
+          SERVICE_NAME="moab-automation-webapp-dev"
+          SERVICE_URL="https://moab-automation-webapp-dev-812611363700.us-central1.run.app"
+          TWILIO_SID_SECRET="TWILIO_ACCOUNT_SID_DEV"
+          TWILIO_TOKEN_SECRET="TWILIO_AUTH_TOKEN_DEV"
+        fi
+
+        gcloud run deploy $$SERVICE_NAME \
           --image=us-central1-docker.pkg.dev/$PROJECT_ID/webapp-repo/moab-automation-webapp:$COMMIT_SHA \
           --region=us-central1 \
           --platform=managed \
           --allow-unauthenticated \
-          --set-secrets=TWILIO_ACCOUNT_SID=TWILIO_ACCOUNT_SID:latest,TWILIO_AUTH_TOKEN=TWILIO_AUTH_TOKEN:latest,NEXTAUTH_SECRET=NEXTAUTH_SECRET:latest,NEXT_PUBLIC_FIREBASE_CONFIG=NEXT_PUBLIC_FIREBASE_CONFIG:latest,FIREBASE_CLIENT_EMAIL=FIREBASE_CLIENT_EMAIL:latest,FIREBASE_PRIVATE_KEY=FIREBASE_PRIVATE_KEY:latest \
-          --set-env-vars=NEXT_PUBLIC_FIREBASE_PROJECT_ID=moonflower-453318,NEXTAUTH_URL=https://moab-automation-webapp-812611363700.us-central1.run.app
+          --set-secrets=TWILIO_ACCOUNT_SID=$$TWILIO_SID_SECRET:latest,TWILIO_AUTH_TOKEN=$$TWILIO_TOKEN_SECRET:latest,NEXTAUTH_SECRET=NEXTAUTH_SECRET:latest,NEXT_PUBLIC_FIREBASE_CONFIG=NEXT_PUBLIC_FIREBASE_CONFIG:latest,FIREBASE_CLIENT_EMAIL=FIREBASE_CLIENT_EMAIL:latest,FIREBASE_PRIVATE_KEY=FIREBASE_PRIVATE_KEY:latest \
+          --set-env-vars=NEXT_PUBLIC_FIREBASE_PROJECT_ID=moonflower-453318,NEXTAUTH_URL=$$SERVICE_URL
+
+
 
 # Tell Cloud Build to push the built image to Artifact Registry
 images:

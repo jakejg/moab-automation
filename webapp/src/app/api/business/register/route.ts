@@ -23,26 +23,43 @@ export async function POST(request: Request) {
         displayName: ownerName,
     });
 
-    // 3. Create a URL-friendly businessId from the business name
-    const potentialId = businessName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+    // 3. Generate a unique business ID and URL-friendly name
+    const urlName = businessName
+      .toLowerCase()
+      .replace(/[^\w\s-]/g, '') // Remove special characters
+      .replace(/\s+/g, '-')      // Replace spaces with hyphens
+      .replace(/-+/g, '-')       // Replace multiple hyphens with single
+      .trim();
 
-    // 4. Check if this businessId already exists
-    const existingBusiness = await firestore.collection('businesses').doc(potentialId).get();
-    if (existingBusiness.exists) {
-        return NextResponse.json({ error: 'A business with this name already exists. Please choose a different name.' }, { status: 409 });
+    // 4. Generate a unique ID for the business
+    const businessId = firestore.collection('businesses').doc().id;
+
+    // 5. Check if the URL name is already taken
+    const existingBusiness = await firestore
+      .collection('businesses')
+      .where('urlName', '==', urlName)
+      .limit(1)
+      .get();
+
+    if (!existingBusiness.empty) {
+      return NextResponse.json(
+        { error: 'A business with this name already exists. Please choose a different name.' }, 
+        { status: 409 }
+      );
     }
-    const businessId = potentialId;
 
-    // 5. Create Business in Firestore
+    // 6. Create Business in Firestore
     const businessRef = firestore.collection('businesses').doc(businessId);
 
     await businessRef.set({
-        businessId: businessId,
-        name: businessName,
-        ownerName: ownerName,
-        ownerEmail: email,
-        userId: userRecord.uid, // Link to the created user
-        createdAt: new Date().toISOString(),
+      id: businessId,
+      businessId: businessId, // Keeping for backward compatibility
+      name: businessName,
+      urlName: urlName,       // Store the URL-friendly name
+      ownerName: ownerName,
+      ownerEmail: email,
+      userId: userRecord.uid, // Link to the created user
+      createdAt: new Date().toISOString(),
     });
 
     return NextResponse.json({ 

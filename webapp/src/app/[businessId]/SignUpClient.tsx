@@ -58,10 +58,18 @@ export default function SignUpClient({ businessId }: SignUpClientProps) {
     setSubmitError(null);
     setMessage('');
     try {
-      const response = await fetch('/api/signup', {
+      // Convert businessId to a URL-friendly format
+      const urlFriendlyName = businessId
+        .toLowerCase()
+        .replace(/[^\w\s-]/g, '')
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-')
+        .trim();
+
+      const response = await fetch(`/api/signup/${urlFriendlyName}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone, businessId }),
+        body: JSON.stringify({ phone }), // No need to send businessId in the body anymore
       });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || 'An unknown error occurred.');
