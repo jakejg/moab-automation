@@ -30,8 +30,8 @@ async function getBusiness(businessId: string): Promise<Business | null> {
   }
 }
 
-export default async function SignUpPage({ params }: { params: { businessId: string } }) {
-  const business = await getBusiness(params.businessId);
+export default async function SignUpPage({ params }: { params: Promise<{ businessId: string }> }) {
+  const business = await getBusiness((await params).businessId);
 
   if (!business) {
     return <div>Business not found</div>;
