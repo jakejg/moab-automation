@@ -12,9 +12,7 @@ interface Business {
 
 async function getBusiness(businessId: string): Promise<Business | null> {
   try {
-    const baseUrl = process.env.VERCEL_URL
-    ? `https://${process.env.VERCEL_URL}`
-    : process.env.NEXT_PUBLIC_URL || 'http://localhost:3000';
+    const baseUrl = process.env.NEXT_PUBLIC_URL || 'http://localhost:3000';
   const res = await fetch(`${baseUrl}/api/business/${businessId}`, {
     cache: 'no-store',
   });
