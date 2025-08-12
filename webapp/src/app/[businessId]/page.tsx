@@ -12,11 +12,12 @@ interface Business {
 
 async function getBusiness(businessId: string): Promise<Business | null> {
   try {
-    // Ensure NEXT_PUBLIC_URL is defined and correct
-    const baseUrl = process.env.NEXT_PUBLIC_URL || 'http://localhost:3000';
-    const res = await fetch(`${baseUrl}/api/business/${businessId}`, {
-      cache: 'no-store',
-    });
+    const baseUrl = process.env.VERCEL_URL
+    ? `https://${process.env.VERCEL_URL}`
+    : process.env.NEXT_PUBLIC_URL || 'http://localhost:3000';
+  const res = await fetch(`${baseUrl}/api/business/${businessId}`, {
+    cache: 'no-store',
+  });
 
     if (!res.ok) {
       console.error(`Failed to fetch business: ${res.statusText}`);
