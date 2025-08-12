@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
+
 interface Business {
   id: string;
   name: string;
@@ -55,7 +55,7 @@ export default function SignUpClient({ business }: SignUpClientProps) {
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-xl text-center">
         {business.logoUrl && (
-          <Image src={business.logoUrl} alt={`${business.businessName || business.name} Logo`} className="h-24 mx-auto mb-4" />
+          <img src={business.logoUrl} alt={`${business.businessName || business.name} Logo`} className="h-24 mx-auto mb-4" />
         )}
         <h1 className="text-3xl font-bold text-gray-900">{business?.headline || 'Join Our VIP List!'}</h1>
         <p className="text-gray-600">{business?.subHeadline || `Get texts from ${business?.businessName || business.name || 'us'} with daily specials.`}</p>
