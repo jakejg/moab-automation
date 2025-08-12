@@ -1,117 +1,82 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
-interface BusinessData {
-  businessName?: string;
+interface Business {
+  id: string;
+  name: string;
+  logoUrl?: string;
   headline?: string;
   subHeadline?: string;
+  businessName?: string;
   complianceText?: string;
 }
 
 interface SignUpClientProps {
-  businessId: string;
+  business: Business;
 }
 
-export default function SignUpClient({ businessId }: SignUpClientProps) {
-  const [business, setBusiness] = useState<BusinessData | null>(null);
-  const [loading, setLoading] = useState(true);
+export default function SignUpClient({ business }: SignUpClientProps) {
+  const [phoneNumber, setPhoneNumber] = useState('');
   const [error, setError] = useState<string | null>(null);
-  const [phone, setPhone] = useState('');
-  const [message, setMessage] = useState('');
-  const [submitError, setSubmitError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!businessId) {
-      setError('No business ID found.');
-      setLoading(false);
-      return;
-    }
-
-    const fetchBusinessData = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const response = await fetch(`/api/business/${businessId}`);
-        const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(data.error || 'Failed to fetch business data.');
-        }
-        setBusiness(data);
-      } catch (err: unknown) {
-        if (err instanceof Error) {
-          setError(err.message);
-        } else {
-          setError('An unknown error occurred.');
-        }
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchBusinessData();
-  }, [businessId]);
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitError(null);
-    setMessage('');
-    try {
-      // Convert businessId to a URL-friendly format
-      const urlFriendlyName = businessId
-        .toLowerCase()
-        .replace(/[^\w\s-]/g, '')
-        .replace(/\s+/g, '-')
-        .replace(/-+/g, '-')
-        .trim();
+    setError(null);
 
-      const response = await fetch(`/api/signup/${urlFriendlyName}`, {
+    try {
+      const response = await fetch('/api/send-message', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone }), // No need to send businessId in the body anymore
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ phoneNumber, businessId: business.id }),
       });
+
       const result = await response.json();
-      if (!response.ok) throw new Error(result.error || 'An unknown error occurred.');
-      setMessage('Success! You are on the list.');
-      setPhone('');
+
+      if (response.ok) {
+        router.push(`/thank-you?businessId=${business.id}`);
+      } else {
+        setError(result.error || 'An unknown error occurred');
+      }
     } catch (err: unknown) {
       if (err instanceof Error) {
-        setSubmitError(err.message);
+        setError(err.message);
       } else {
-        setSubmitError('An unknown error occurred.');
+        setError('An unknown error occurred.');
       }
     }
   };
 
-  if (loading) return <div className="flex justify-center items-center h-screen">Loading...</div>;
-  if (error) return <div className="flex justify-center items-center h-screen text-red-500">Error: {error}</div>;
-  if (!business) return <div className="flex justify-center items-center h-screen">Business not found.</div>;
-
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-xl text-center">
+        {business.logoUrl && (
+          <img src={business.logoUrl} alt={`${business.businessName || business.name} Logo`} className="h-24 mx-auto mb-4" />
+        )}
         <h1 className="text-3xl font-bold text-gray-900">{business?.headline || 'Join Our VIP List!'}</h1>
-        <p className="text-gray-600">{business?.subHeadline || `Get texts from ${business?.businessName || 'us'} with daily specials.`}</p>
+        <p className="text-gray-600">{business?.subHeadline || `Get texts from ${business?.businessName || business.name || 'us'} with daily specials.`}</p>
         <form onSubmit={handleSubmit} className="space-y-4 pt-4">
           <input
             type="tel"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
+            value={phoneNumber}
+            onChange={(e) => setPhoneNumber(e.target.value)}
             placeholder="Enter your phone number"
             className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
             required
           />
           <button
             type="submit"
-            className="w-full py-2 px-4 bg-indigo-600 text-white font-semibold rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            className="w-full px-6 py-2 text-white bg-indigo-600 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
           >
             Join Now
           </button>
         </form>
-        {message && <p className="text-green-600 mt-4">{message}</p>}
-        {submitError && <p className="text-red-600 mt-4">{submitError}</p>}
-        <p className="text-xs text-gray-500 pt-4">{business?.complianceText || 'Standard message and data rates may apply.'}</p>
+        {error && <p className="text-red-600 mt-4">{error}</p>}
+        <p className="text-xs text-gray-500 mt-4">{business?.complianceText || 'By signing up, you agree to receive marketing messages from us. By submitting, you consent to receive text messages. Message & data rates may apply. Reply HELP for help, STOP to cancel anytime. View our Privacy Policy [link to your privacy policy page]'}</p>
       </div>
     </div>
   );

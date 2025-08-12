@@ -38,7 +38,6 @@ steps:
       - '-c'
       - |
         docker build \
-          --no-cache \
           --build-arg "NEXT_PUBLIC_FIREBASE_CONFIG=$${NEXT_PUBLIC_FIREBASE_CONFIG}" \
           --build-arg "NEXT_PUBLIC_FIREBASE_PROJECT_ID=moonflower-453318" \
           --build-arg "FIREBASE_CLIENT_EMAIL=$${FIREBASE_CLIENT_EMAIL}" \
@@ -77,7 +76,7 @@ steps:
           --platform=managed \
           --allow-unauthenticated \
           --set-secrets=TWILIO_ACCOUNT_SID=$$TWILIO_SID_SECRET:latest,TWILIO_AUTH_TOKEN=$$TWILIO_TOKEN_SECRET:latest,NEXTAUTH_SECRET=NEXTAUTH_SECRET:latest,NEXT_PUBLIC_FIREBASE_CONFIG=NEXT_PUBLIC_FIREBASE_CONFIG:latest,FIREBASE_CLIENT_EMAIL=FIREBASE_CLIENT_EMAIL:latest,FIREBASE_PRIVATE_KEY=FIREBASE_PRIVATE_KEY:latest \
-          --set-env-vars=NEXT_PUBLIC_FIREBASE_PROJECT_ID=moonflower-453318,NEXTAUTH_URL=$$SERVICE_URL
+          --set-env-vars=NEXT_PUBLIC_FIREBASE_PROJECT_ID=moonflower-453318,NEXTAUTH_URL=$$SERVICE_URL,NEXT_PUBLIC_URL=$$SERVICE_URL
 
 
 
