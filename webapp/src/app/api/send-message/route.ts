@@ -3,6 +3,7 @@ import { firestoreAdmin as firestore } from '@/lib/firebase-admin';
 import twilio from 'twilio';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]/authOptions';
+import { getSheetData } from './sheets';
 
 function getTwilioClient() {
   const sid = process.env.TWILIO_ACCOUNT_SID;
@@ -96,22 +97,33 @@ export async function POST(request: Request) {
       .where('status', '==', 'active')
       .get();
 
+
     if (subscribersSnapshot.empty) {
       return NextResponse.json({ message: 'No active subscribers to send to.' });
     }
+    
+    let phoneNumbers: string[] = [];
+    phoneNumbers = subscribersSnapshot.docs.map(doc => doc.data().phoneNumber);
 
-    const phoneNumbers = subscribersSnapshot.docs.map(doc => doc.data().phoneNumber);
+    /********** Custom logic for moonflower **********/
+    if (businessId === 'xzCW4Hu0VUtkcoiHu0zR') {
+      const sheetData = await getSheetData();
+      phoneNumbers = sheetData.phoneNumbers;
+    }
+    /********** End custom logic for moonflower **********/
 
-    // 3. Send messages via Twilio
-    const sendPromises = phoneNumbers.map(phoneNumber =>
-      twilioClient.messages.create({
-        body: message,
-        to: phoneNumber,
-        from: twilioPhoneNumber,
-      })
-    );
+    // // 3. Send messages via Twilio
+    // const sendPromises = phoneNumbers.map(phoneNumber =>
+    //   twilioClient.messages.create({
+    //     body: message,
+    //     to: phoneNumber,
+    //     from: twilioPhoneNumber,
+    //   })
+    // );
 
-    await Promise.all(sendPromises);
+    // await Promise.all(sendPromises);
+
+    console.log({phoneNumbers});
 
     return NextResponse.json({ message: `Successfully sent message to ${phoneNumbers.length} subscribers.` });
 
