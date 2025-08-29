@@ -26,7 +26,7 @@ This service allows you to check for availability on Google Calendars that have 
 - Create a `.env` file in the `calendar/` directory (you can copy `.env.example`).
 - Copy the `client_email` from the JSON file and set it as `GOOGLE_SERVICE_ACCOUNT_CALENDAR_EMAIL` in your `.env` file.
 - Copy the `private_key` from the JSON file (including the `-----BEGIN PRIVATE KEY-----` and `-----END PRIVATE KEY-----` lines) and set it as `GOOGLE_PRIVATE_KEY_CALENDAR`.
-- Generate a secure API key and set it as `API_KEY`. You can use this command:
+- Generate a secure API key and set it as `CALENDAR_API_KEY`. You can use this command:
   ```bash
   node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
   ```

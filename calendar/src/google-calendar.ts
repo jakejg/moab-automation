@@ -38,12 +38,10 @@ export async function findEarliestAvailability(
     const intervalMilliseconds = intervalMinutes * 60 * 1000;
     const now = new Date(Math.ceil(new Date().getTime() / intervalMilliseconds) * intervalMilliseconds);
     if (timeMin == null) {
-      console.log('timeMin is null, setting to now');
       timeMin = now.toISOString();
     }
     
     if (timeMax == null) {
-      console.log('timeMax is null, setting to now + 10 days');
       timeMax = new Date(new Date().setUTCDate(now.getUTCDate() + 10)).toISOString(); // Default next 10 days
     }
 
