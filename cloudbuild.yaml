@@ -6,8 +6,47 @@ availableSecrets:
     env: 'FIREBASE_CLIENT_EMAIL'
   - versionName: projects/812611363700/secrets/FIREBASE_PRIVATE_KEY/versions/latest
     env: 'FIREBASE_PRIVATE_KEY'
+  - versionName: projects/812611363700/secrets/CALENDAR_API_KEY/versions/latest
+    env: 'CALENDAR_API_KEY'
+  - versionName: projects/812611363700/secrets/GOOGLE_SERVICE_ACCOUNT_CALENDAR_EMAIL/versions/latest
+    env: 'GOOGLE_SERVICE_ACCOUNT_CALENDAR_EMAIL'
+  - versionName: projects/812611363700/secrets/GOOGLE_PRIVATE_KEY_CALENDAR/versions/latest
+    env: 'GOOGLE_PRIVATE_KEY_CALENDAR'
 
 steps:
+# Step 1: Deploy the 'calendar' Cloud Function
+  - name: 'gcr.io/cloud-builders/npm'
+    id: 'Install dependencies for calendar function'
+    args: ['install']
+    dir: 'calendar'
+
+  - name: 'gcr.io/cloud-builders/npm'
+    id: 'Build calendar function'
+    args: ['run', 'build']
+    dir: 'calendar'
+
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    id: 'Deploy calendar function'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        if [ "$BRANCH_NAME" = "main" ]; then
+          FUNCTION_NAME="calendar"
+          API_KEY_SECRET="CALENDAR_API_KEY"
+        else
+          FUNCTION_NAME="calendar-dev"
+          API_KEY_SECRET="CALENDAR_API_KEY_DEV"
+        fi
+
+        gcloud functions deploy $$FUNCTION_NAME \
+          --entry-point=calendar \
+          --runtime=nodejs20 \
+          --trigger-http \
+          --allow-unauthenticated \
+          --source=./calendar \
+          --set-secrets=CALENDAR_API_KEY=$$API_KEY_SECRET:latest,GOOGLE_SERVICE_ACCOUNT_CALENDAR_EMAIL=GOOGLE_SERVICE_ACCOUNT_CALENDAR_EMAIL:latest,GOOGLE_PRIVATE_KEY_CALENDAR=GOOGLE_PRIVATE_KEY_CALENDAR:latest
+
 # # Step 1: Deploy the 'sms' Cloud Function (existing step)
 #   - name: 'gcr.io/cloud-builders/npm'
 #     id: 'Install dependencies for SMS function'
@@ -47,7 +86,6 @@ steps:
     dir: 'webapp' # Run this step in the webapp directory
     secretEnv: ['NEXT_PUBLIC_FIREBASE_CONFIG','FIREBASE_CLIENT_EMAIL','FIREBASE_PRIVATE_KEY']
 
-
   - name: 'gcr.io/cloud-builders/docker'
     id: 'Push webapp container image'
     args: ['push', 'us-central1-docker.pkg.dev/$PROJECT_ID/webapp-repo/moab-automation-webapp:$COMMIT_SHA']
@@ -83,8 +121,6 @@ steps:
           --allow-unauthenticated \
           --set-secrets=TWILIO_ACCOUNT_SID=$$TWILIO_SID_SECRET:latest,TWILIO_AUTH_TOKEN=$$TWILIO_TOKEN_SECRET:latest,NEXTAUTH_SECRET=NEXTAUTH_SECRET:latest,NEXT_PUBLIC_FIREBASE_CONFIG=NEXT_PUBLIC_FIREBASE_CONFIG:latest,FIREBASE_CLIENT_EMAIL=FIREBASE_CLIENT_EMAIL:latest,FIREBASE_PRIVATE_KEY=FIREBASE_PRIVATE_KEY:latest,GOOGLE_SHEET_ID=GOOGLE_SHEET_ID:latest,GOOGLE_SERVICE_ACCOUNT_EMAIL=GOOGLE_SERVICE_ACCOUNT_EMAIL:latest,GOOGLE_PRIVATE_KEY=GOOGLE_PRIVATE_KEY:latest \
           --set-env-vars=NEXT_PUBLIC_FIREBASE_PROJECT_ID=moonflower-453318,NEXTAUTH_URL=$$SERVICE_URL,NEXT_PUBLIC_URL=$$SERVICE_URL
-
-
 
 # Tell Cloud Build to push the built image to Artifact Registry
 images:
