@@ -17,25 +17,9 @@ const auth = new JWT({
 
 const gcal = google.calendar({ version: 'v3', auth });
 
-interface FreeBusyRequest {
-  items: { id: string }[];
-  timeMin: string;
-  timeMax: string;
-}
-
 interface BookingWindow {
   hour: number
   minute: number
-}
-
-export async function checkAvailability(requestBody: FreeBusyRequest) {
-  try {
-    const response = await gcal.freebusy.query({ requestBody });
-    return response.data.calendars;
-  } catch (error) {
-    console.error('Error checking free-busy times:', error);
-    throw new Error('Failed to check calendar availability.');
-  }
 }
 
 export async function findEarliestAvailability(
@@ -46,14 +30,27 @@ export async function findEarliestAvailability(
   bookingWindowEnd: BookingWindow = {hour: 17, minute: 0},
   intervalMinutes: number = 60,
   numberOfSlots: number = 2, // Number of slots to find for each calendar
+  timeMin: string,
+  timeMax: string
 
 ) {
 
     const intervalMilliseconds = intervalMinutes * 60 * 1000;
     const now = new Date(Math.ceil(new Date().getTime() / intervalMilliseconds) * intervalMilliseconds);
-    const timeMin = now.toISOString();
-    const timeMax = new Date(new Date().setUTCDate(now.getUTCDate() + 10)).toISOString(); // Search next 10 days
+    if (timeMin == null) {
+      console.log('timeMin is null, setting to now');
+      timeMin = now.toISOString();
+    }
+    
+    if (timeMax == null) {
+      console.log('timeMax is null, setting to now + 10 days');
+      timeMax = new Date(new Date().setUTCDate(now.getUTCDate() + 10)).toISOString(); // Default next 10 days
+    }
 
+    if (new Date(timeMin).getTime() > new Date(timeMax).getTime()){
+      throw new Error('timeMin must be before timeMax');
+    }
+   
 
   const freeBusyResponse = await gcal.freebusy.query({
     requestBody: {

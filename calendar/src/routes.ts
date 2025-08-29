@@ -2,7 +2,7 @@ import { Router } from 'express';
 
 const router = Router();
 
-import { checkAvailability, findEarliestAvailability } from './google-calendar';
+import { findEarliestAvailability } from './google-calendar';
 
 import { apiKeyAuth } from './auth';
 
@@ -12,30 +12,18 @@ router.post('/availability', apiKeyAuth, async (req, res) => {
   if (!calendars || !Array.isArray(calendars) || calendars.length === 0) {
     return res.status(400).json({ error: 'Please provide a non-empty array of calendar IDs.' });
   }
-
-  if (startTime && endTime) {
-    try {
-      const requestBody = {
-        items: calendars.map((id: string) => ({ id })),
-        timeMin: new Date(startTime).toISOString(),
-        timeMax: new Date(endTime).toISOString(),
-      };
-      const result = await checkAvailability(requestBody);
-      let isBusy = false;
-      if (result) {
-        isBusy = Object.values(result).some(cal => cal.busy && cal.busy.length > 0);
-      }
-      return res.json({ available: !isBusy });
-    } catch (error) {
-      console.error(error);
-      return res.status(500).json({ error: 'Failed to check calendar availability.' });
-    }
-  } else {
     try {
       const calendarIds = calendars.map((id: string) => ({ id }));
       const duration = req.body.duration
       const timezone = req.body.timezone;
-      const earliestSlot = await findEarliestAvailability(calendarIds, duration, timezone, req.body.bookingWindowStart, req.body.bookingWindowEnd, req.body.intervalMinutes, req.body.numberOfSlots);
+      const timeMin = req.body.timeMin;
+      const timeMax = req.body.timeMax;
+      const bookingWindowStart = req.body.bookingWindowStart;
+      const bookingWindowEnd = req.body.bookingWindowEnd;
+      const intervalMinutes = req.body.duration;
+      const numberOfSlots = req.body.numberOfSlots;
+
+      const earliestSlot = await findEarliestAvailability(calendarIds, duration, timezone, bookingWindowStart, bookingWindowEnd, intervalMinutes, numberOfSlots, timeMin, timeMax);
       if (earliestSlot) {
         return res.json(earliestSlot);
       } else {
@@ -43,9 +31,11 @@ router.post('/availability', apiKeyAuth, async (req, res) => {
       }
     } catch (error) {
       console.error(error);
+      if (error instanceof Error) {
+        return res.status(400).json({ error: error.message });
+      }
       return res.status(500).json({ error: 'Failed to find earliest availability.' });
     }
-  }
 });
 
 export default router;
