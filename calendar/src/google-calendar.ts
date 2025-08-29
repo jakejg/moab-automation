@@ -1,17 +1,19 @@
-import { google } from 'googleapis';
+import { calendar_v3, google } from 'googleapis';
 import { toZonedTime, toDate, format } from 'date-fns-tz';
+import Schema$TimePeriod = calendar_v3.Schema$TimePeriod;
 
 import { JWT } from 'google-auth-library';
 
 const SCOPES = ['https://www.googleapis.com/auth/calendar.readonly'];
 
-const privateKey = process.env.GOOGLE_PRIVATE_KEY?.replace(/\n/g, '\n');
+const privateKey = process.env.GOOGLE_PRIVATE_KEY_CALENDAR?.replace(/\n/g, '\n');
 
 const auth = new JWT({
-  email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
+  email: process.env.GOOGLE_SERVICE_ACCOUNT_CALENDAR_EMAIL,
   key: privateKey,
   scopes: SCOPES,
 });
+
 
 const gcal = google.calendar({ version: 'v3', auth });
 
@@ -42,12 +44,16 @@ export async function findEarliestAvailability(
   timezone: string = 'America/Denver',
   bookingWindowStart: BookingWindow = {hour: 8, minute: 0},
   bookingWindowEnd: BookingWindow = {hour: 17, minute: 0},
-  intervalMinutes: number = 60
+  intervalMinutes: number = 60,
+  numberOfSlots: number = 2, // Number of slots to find for each calendar
+
 ) {
-  const intervalMilliseconds = intervalMinutes * 60 * 1000;
-  const now = new Date(Math.ceil(new Date().getTime() / intervalMilliseconds) * intervalMilliseconds);
-  const timeMin = now.toISOString();
-  const timeMax = new Date(new Date().setUTCDate(now.getUTCDate() + 10)).toISOString(); // Search next 10 days
+
+    const intervalMilliseconds = intervalMinutes * 60 * 1000;
+    const now = new Date(Math.ceil(new Date().getTime() / intervalMilliseconds) * intervalMilliseconds);
+    const timeMin = now.toISOString();
+    const timeMax = new Date(new Date().setUTCDate(now.getUTCDate() + 10)).toISOString(); // Search next 10 days
+
 
   const freeBusyResponse = await gcal.freebusy.query({
     requestBody: {
@@ -61,55 +67,36 @@ export async function findEarliestAvailability(
     return null;
   }
 
-  const calendar = freeBusyResponse.data.calendars['xxxxxxxxxxxxxxxxx'].busy;
-  console.log({calendar});
-  if (calendar) {
-    let startBooking = now 
-    let endBooking = new Date(startBooking.getTime() + durationMinutes * 60000);
+  const calendars = Object.entries(freeBusyResponse.data.calendars).map(([calendarId, busyData]) => {
+    return {
+      calendarId: calendarId,
+      busySlots: busyData.busy,
+    };
+  });
 
-    for (const event of calendar) {
-      if (event.start && endBooking.getTime() < new Date(event.start).getTime()) {
-        // time is available! check if it's within the booking window
-        const inWindow = checkBookingWindow(startBooking, endBooking, bookingWindowStart, bookingWindowEnd, timezone);
-        if (inWindow) {
-          return {
-            startTime: format(startBooking, "yyyy-MM-dd'T'HH:mm:ssXXX", { timeZone: timezone }),
-            endTime: format(endBooking, "yyyy-MM-dd'T'HH:mm:ssXXX", { timeZone: timezone })
-          };
-        }
-        else {
-          // move to the start of the next day/booking window in the users timezone
-          // startBooking.setUTCDate(startBooking.getUTCDate() + 1);
-          const zonedDate = toZonedTime(startBooking, timezone);
-          zonedDate.setDate(zonedDate.getDate() + 1);
+  const openSlots: { startTime: string; endTime: string, calendarId: string }[] = [];
 
-          const startBookingInZone = createDateInZone(zonedDate, bookingWindowStart, timezone);
-          const endBookingInZone = new Date(startBookingInZone.getTime() + durationMinutes * 60000);
+  for (const calendar of calendars) {
 
-          // if time is availabe, great! 
-          if (endBookingInZone.getTime() < toZonedTime(new Date(event.start), timezone).getTime()) {
-            return {
-              startTime: format(startBookingInZone, "yyyy-MM-dd'T'HH:mm:ssXXX", { timeZone: timezone }),
-              endTime: format(endBookingInZone, "yyyy-MM-dd'T'HH:mm:ssXXX", { timeZone: timezone })
-            };
-          }
-          // if not just continue to the next event
-          else {
-            startBooking = new Date(event.end!!)
-            endBooking = new Date(startBooking.getTime() + durationMinutes * 60000);
+    const { busySlots } = calendar;
+
+    if (busySlots) {
+      let startTime = timeMin;
+
+      for (let i = 0; i < numberOfSlots; i++) {
+          const openSlot = getEarliestSlot(busySlots, durationMinutes, bookingWindowStart, bookingWindowEnd, timezone, startTime, timeMax, intervalMinutes);
+          if (openSlot) {
+            openSlots.push({ ...openSlot, calendarId: calendar.calendarId });
+            startTime = openSlot.endTime;
           }
         }
-      }
-      else {
-        // busy, move to the end of the current busy block
-        startBooking = new Date(event.end!!)
-        endBooking = new Date(startBooking.getTime() + durationMinutes * 60000);
       }
     }
 
-    return null; // No slot found
-  }
+  openSlots.sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime());
+  return openSlots;
 }
+
 
 function checkBookingWindow(startBooking: Date, endBooking: Date, bookingWindowStart: BookingWindow, bookingWindowEnd: BookingWindow, timezone: string) {
   const windowStartInZone = createDateInZone(startBooking, bookingWindowStart, timezone);
@@ -135,3 +122,58 @@ function createDateInZone(date: Date, time: BookingWindow, timezone: string): Da
   const dateString = `${year}-${month}-${day}T${String(time.hour).padStart(2, '0')}:${String(time.minute).padStart(2, '0')}:00`;
   return toDate(dateString, { timeZone: timezone });
 }
+
+function getEarliestSlot(
+  busySlots: Schema$TimePeriod[],
+  durationMinutes: number,
+  bookingWindowStart: BookingWindow,
+  bookingWindowEnd: BookingWindow,
+  timezone: string,
+  timeMin: string,
+  timeMax: string,
+  intervalMinutes: number
+): { startTime: string; endTime: string } | null {
+  let slotStart = toDate(timeMin);
+  const endTimeLimit = toDate(timeMax);
+  const durationMilliseconds = durationMinutes * 60000;
+  const intervalMilliseconds = intervalMinutes * 60000;
+ 
+  while (slotStart < endTimeLimit) {
+    const slotEnd = new Date(slotStart.getTime() + durationMilliseconds);
+
+    if (slotEnd > endTimeLimit) {
+      return null; // Slot extends beyond the search limit
+    }
+
+    const isBusy = busySlots.some(busy => {
+      const busyStart = new Date(busy.start!);
+      const busyEnd = new Date(busy.end!);
+      // Check for overlap: (StartA < EndB) and (EndA > StartB)
+      return slotStart < busyEnd && slotEnd > busyStart;
+    });
+
+    if (!isBusy) {
+
+      const isInWindow = checkBookingWindow(
+        slotStart,
+        slotEnd,
+        bookingWindowStart,
+        bookingWindowEnd,
+        timezone
+      );
+
+      if (isInWindow) {
+        return {
+          startTime: format(slotStart, "yyyy-MM-dd'T'HH:mm:ssXXX", { timeZone: timezone }),
+          endTime: format(slotEnd, "yyyy-MM-dd'T'HH:mm:ssXXX", { timeZone: timezone })
+        };
+      }
+    }
+
+    // Move to the next time slot
+    slotStart = new Date(slotStart.getTime() + intervalMilliseconds);
+  }
+
+  return null; // No available slot found
+}
+ 

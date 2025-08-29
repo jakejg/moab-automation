@@ -35,8 +35,7 @@ router.post('/availability', apiKeyAuth, async (req, res) => {
       const calendarIds = calendars.map((id: string) => ({ id }));
       const duration = req.body.duration
       const timezone = req.body.timezone;
-      const earliestSlot = await findEarliestAvailability(calendarIds, duration, timezone);
-
+      const earliestSlot = await findEarliestAvailability(calendarIds, duration, timezone, req.body.bookingWindowStart, req.body.bookingWindowEnd, req.body.intervalMinutes, req.body.numberOfSlots);
       if (earliestSlot) {
         return res.json(earliestSlot);
       } else {
