@@ -6,7 +6,6 @@ availableSecrets:
     env: 'FIREBASE_CLIENT_EMAIL'
   - versionName: projects/812611363700/secrets/FIREBASE_PRIVATE_KEY/versions/latest
     env: 'FIREBASE_PRIVATE_KEY'
-  - versionName: projects/812611363700/secrets/CALENDAR_API_KEY/versions/latest
 
 steps:
 # Step 1: Deploy the 'calendar' Cloud Function
