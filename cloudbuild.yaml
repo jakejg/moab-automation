@@ -23,7 +23,6 @@ steps:
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     id: 'Deploy calendar function'
     entrypoint: 'bash'
-    secretEnv: ['GOOGLE_PRIVATE_KEY_CALENDAR']
     args:
       - '-c'
       - |
