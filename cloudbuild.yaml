@@ -7,11 +7,6 @@ availableSecrets:
   - versionName: projects/812611363700/secrets/FIREBASE_PRIVATE_KEY/versions/latest
     env: 'FIREBASE_PRIVATE_KEY'
   - versionName: projects/812611363700/secrets/CALENDAR_API_KEY/versions/latest
-    env: 'CALENDAR_API_KEY'
-  - versionName: projects/812611363700/secrets/GOOGLE_SERVICE_ACCOUNT_CALENDAR_EMAIL/versions/latest
-    env: 'GOOGLE_SERVICE_ACCOUNT_CALENDAR_EMAIL'
-  - versionName: projects/812611363700/secrets/GOOGLE_PRIVATE_KEY_CALENDAR/versions/latest
-    env: 'GOOGLE_PRIVATE_KEY_CALENDAR'
 
 steps:
 # Step 1: Deploy the 'calendar' Cloud Function
