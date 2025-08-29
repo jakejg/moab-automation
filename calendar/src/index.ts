@@ -16,6 +16,5 @@ app.get('/', (req, res) => {
   res.send('Calendar service is running!');
 });
 
-app.listen(port, () => {
-  console.log(`Server is running on http://localhost:${port}`);
-});
+// Export the express app for Google Cloud Functions
+export const calendar = app;
