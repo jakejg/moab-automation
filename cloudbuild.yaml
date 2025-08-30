@@ -34,6 +34,7 @@ steps:
         fi
 
         gcloud functions deploy $$FUNCTION_NAME \
+          --entry-point=calendar \
           --runtime=nodejs20 \
           --trigger-http \
           --allow-unauthenticated \

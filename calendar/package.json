@@ -4,7 +4,7 @@
   "description": "A service to check calendar availability.",
   "main": "dist/index.js",
   "scripts": {
-    "start": "node dist/index.js",
+    "start": "functions-framework --target=calendar",
     "prestart": "npm run build",
     "build": "tsc",
     "lint": "eslint . --ext .ts"
@@ -16,6 +16,7 @@
     "googleapis": "^100.0.0"
   },
   "devDependencies": {
+    "@google-cloud/functions-framework": "^3.0.0",
     "@types/express": "^4.17.13",
     "@types/node": "^16.11.12",
     "@typescript-eslint/eslint-plugin": "^5.7.0",
