@@ -128,11 +128,14 @@ function getEarliestSlot(
   timeMax: string,
   intervalMinutes: number
 ): { startTime: string; endTime: string } | null {
-  let slotStart = toDate(timeMin);
-  const endTimeLimit = toDate(timeMax);
+  const zonedTimeMin = toZonedTime(timeMin, timezone);
+  const zonedTimeMax = toZonedTime(timeMax, timezone);
+
+  let slotStart = zonedTimeMin;
+  const endTimeLimit = zonedTimeMax;
   const durationMilliseconds = durationMinutes * 60000;
   const intervalMilliseconds = intervalMinutes * 60000;
- 
+
   while (slotStart < endTimeLimit) {
     const slotEnd = new Date(slotStart.getTime() + durationMilliseconds);
 
