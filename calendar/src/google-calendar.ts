@@ -94,28 +94,22 @@ export async function findEarliestAvailability(
 
 
 function checkBookingWindow(startBooking: Date, endBooking: Date, bookingWindowStart: BookingWindow, bookingWindowEnd: BookingWindow, timezone: string) {
-  const windowStartInZone = createDateInZone(startBooking, bookingWindowStart, timezone);
-  const windowEndInZone = createDateInZone(startBooking, bookingWindowEnd, timezone)
+  const zonedStart = toZonedTime(startBooking, timezone);
+  const zonedEnd = toZonedTime(endBooking, timezone);
 
-  // is the start time before the window start in the current users timezone?
-  if (startBooking.getTime() < windowStartInZone.getTime()) {
-    return false;
+  const startTime = zonedStart.getHours() * 100 + zonedStart.getMinutes();
+  let endTime = zonedEnd.getHours() * 100 + zonedEnd.getMinutes();
+
+  // If a slot ends exactly at midnight, it's part of the previous day's window.
+  // Treat it as 2400 for comparison purposes.
+  if (endTime === 0) {
+    endTime = 2400;
   }
-  // is the end time after the window end in the current users timezone?
-  if (endBooking.getTime() > windowEndInZone.getTime()) {
-    return false;
-  }
 
-  return true;
-}
+  const windowStartTime = bookingWindowStart.hour * 100 + bookingWindowStart.minute;
+  const windowEndTime = bookingWindowEnd.hour * 100 + bookingWindowEnd.minute;
 
-function createDateInZone(date: Date, time: BookingWindow, timezone: string): Date {
-  const zonedDay = toZonedTime(date, timezone);
-  const year = zonedDay.getFullYear();
-  const month = (zonedDay.getMonth() + 1).toString().padStart(2, '0');
-  const day = zonedDay.getDate().toString().padStart(2, '0');
-  const dateString = `${year}-${month}-${day}T${String(time.hour).padStart(2, '0')}:${String(time.minute).padStart(2, '0')}:00`;
-  return toDate(dateString, { timeZone: timezone });
+  return startTime >= windowStartTime && endTime <= windowEndTime;
 }
 
 function getEarliestSlot(
@@ -144,8 +138,8 @@ function getEarliestSlot(
     }
 
     const isBusy = busySlots.some(busy => {
-      const busyStart = new Date(busy.start!);
-      const busyEnd = new Date(busy.end!);
+      const busyStart = toZonedTime(new Date(busy.start!), timezone);
+      const busyEnd = toZonedTime(new Date(busy.end!), timezone);
       // Check for overlap: (StartA < EndB) and (EndA > StartB)
       return slotStart < busyEnd && slotEnd > busyStart;
     });
