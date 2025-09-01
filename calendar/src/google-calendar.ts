@@ -6,7 +6,7 @@ import { JWT } from 'google-auth-library';
 
 const SCOPES = ['https://www.googleapis.com/auth/calendar.readonly'];
 
-const privateKey = process.env.GOOGLE_PRIVATE_KEY_CALENDAR?.replace(/\n/g, '\n');
+const privateKey = process.env.GOOGLE_PRIVATE_KEY_CALENDAR?.replace(/\\n/g, '\n');
 
 const auth = new JWT({
   email: process.env.GOOGLE_SERVICE_ACCOUNT_CALENDAR_EMAIL,
