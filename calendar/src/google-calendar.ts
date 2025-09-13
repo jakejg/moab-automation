@@ -122,13 +122,24 @@ function getEarliestSlot(
   timeMax: string,
   intervalMinutes: number
 ): { startTime: string; endTime: string } | null {
-  const zonedTimeMin = toZonedTime(timeMin, timezone);
-  const zonedTimeMax = toZonedTime(timeMax, timezone);
-
-  let slotStart = zonedTimeMin;
-  const endTimeLimit = zonedTimeMax;
-  const durationMilliseconds = durationMinutes * 60000;
   const intervalMilliseconds = intervalMinutes * 60000;
+  const durationMilliseconds = durationMinutes * 60000;
+
+  const requestedStartTime = toZonedTime(timeMin, timezone);
+  const now = toZonedTime(new Date(), timezone);
+
+  // Determine the booking window start on the requested day.
+  const windowStartOnReqDay = toZonedTime(new Date(requestedStartTime.getFullYear(), requestedStartTime.getMonth(), requestedStartTime.getDate(), bookingWindowStart.hour, bookingWindowStart.minute), timezone);
+
+  // Start the search at the latest of: now, the requested start time, or the booking window on that day.
+  let effectiveStartTime = (now > requestedStartTime) ? now : requestedStartTime;
+  if (effectiveStartTime < windowStartOnReqDay) {
+    effectiveStartTime = windowStartOnReqDay;
+  }
+
+  // Align the final start time to the next interval.
+  let slotStart = new Date(Math.ceil(effectiveStartTime.getTime() / intervalMilliseconds) * intervalMilliseconds);
+  const endTimeLimit = toZonedTime(timeMax, timezone);
 
   while (slotStart < endTimeLimit) {
     const slotEnd = new Date(slotStart.getTime() + durationMilliseconds);

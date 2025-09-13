@@ -48,6 +48,7 @@ export const authOptions: NextAuthOptions = {
               name: businessData.ownerName,
               businessId: businessData.businessId,
               businessUrlName: businessData.urlName,
+              logoUrl: businessData.logoUrl,
             };
           }
           return null;
@@ -65,6 +66,7 @@ export const authOptions: NextAuthOptions = {
         token.id = user.id;
         token.businessId = user.businessId;
         token.businessUrlName = user.businessUrlName;
+        token.logoUrl = user.logoUrl;
       }
       return token;
     },
@@ -74,6 +76,7 @@ export const authOptions: NextAuthOptions = {
         newSession.user.id = token.id as string;
         newSession.user.businessId = token.businessId as string;
         newSession.user.businessUrlName = token.businessUrlName as string;
+        newSession.user.logoUrl = token.logoUrl as string;
       }
       return newSession;
     },
