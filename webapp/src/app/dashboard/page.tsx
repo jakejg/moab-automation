@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 
 const DashboardPage = () => {
   const { data: session, status: sessionStatus } = useSession();
@@ -59,6 +60,17 @@ const DashboardPage = () => {
     >
       <div className="absolute inset-0 bg-black opacity-50"></div>
       <div className="relative z-10 max-w-2xl w-full bg-white/10 backdrop-blur-md p-8 rounded-2xl shadow-xl">
+        {session?.user?.logoUrl && (
+          <div className="flex justify-center mb-6">
+            <Image
+              src={session.user.logoUrl}
+              alt="Business Logo"
+              width={120}
+              height={120}
+              className="rounded-full"
+            />
+          </div>
+        )}
         <h1 className="text-3xl font-bold text-white mb-8 text-center">Send a Message to Your Subscribers</h1>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
