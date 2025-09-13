@@ -33,19 +33,26 @@ export default function SignInPage() {
   };
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-gray-50 p-8">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-900">Business Login</h1>
-          <p className="mt-2 text-gray-600">Sign in to manage your account.</p>
+    <div
+      className="relative flex min-h-screen flex-col items-center justify-center bg-cover bg-center p-8"
+      style={{ backgroundImage: "url('/torre-valley.jpg')" }}
+    >
+      <div className="absolute inset-0 bg-black opacity-50"></div>
+      <div className="relative z-10 w-full max-w-md">
+        <div className="text-center mb-8 text-white">
+          <h1 className="text-4xl font-bold">Business Login</h1>
+          <p className="mt-2 text-lg">Sign in to manage your account.</p>
         </div>
-        <form onSubmit={handleSubmit} className="bg-white shadow-md rounded-lg px-8 pt-6 pb-8 mb-4">
+        <form
+          onSubmit={handleSubmit}
+          className="bg-white/10 backdrop-blur-md shadow-lg rounded-lg px-8 pt-6 pb-8 mb-4"
+        >
           <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="email">
+            <label className="block text-white text-sm font-bold mb-2" htmlFor="email">
               Email Address
             </label>
             <input
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              className="bg-transparent border border-gray-300 text-white rounded w-full py-2 px-3 leading-tight focus:outline-none focus:shadow-outline placeholder-gray-400"
               id="email"
               type="email"
               placeholder="you@company.com"
@@ -55,11 +62,11 @@ export default function SignInPage() {
             />
           </div>
           <div className="mb-6">
-            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="password">
+            <label className="block text-white text-sm font-bold mb-2" htmlFor="password">
               Password
             </label>
             <input
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"
+              className="bg-transparent border border-gray-300 text-white rounded w-full py-2 px-3 leading-tight focus:outline-none focus:shadow-outline placeholder-gray-400"
               id="password"
               type="password"
               placeholder="******************"
@@ -70,15 +77,15 @@ export default function SignInPage() {
           </div>
           <div className="flex items-center justify-between">
             <button
-              className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full"
+              className="w-full rounded-lg bg-blue-600 px-8 py-3 text-lg font-semibold text-white shadow-lg transition-transform duration-300 hover:scale-105 hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-500 focus:ring-opacity-50"
               type="submit"
             >
               Sign In
             </button>
           </div>
-          {error && <p className="mt-4 text-center text-red-500 text-xs">{error}</p>}
+          {error && <p className="mt-4 text-center text-red-400 text-sm">{error}</p>}
         </form>
       </div>
-    </main>
+    </div>
   );
 }
