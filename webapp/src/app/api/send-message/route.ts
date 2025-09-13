@@ -4,6 +4,7 @@ import twilio from 'twilio';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]/authOptions';
 import { getSheetData } from './sheets';
+import { logSMS } from '@/lib/analytics';
 
 function getTwilioClient() {
   const sid = process.env.TWILIO_ACCOUNT_SID;
@@ -120,9 +121,10 @@ export async function POST(request: Request) {
       })
     );
 
-    await Promise.all(sendPromises);
+    const results = await Promise.allSettled(sendPromises);
+    const successfulSends = await logSMS(businessId, results);
 
-    return NextResponse.json({ message: `Successfully sent message to ${phoneNumbers.length} subscribers.` });
+    return NextResponse.json({ message: `Successfully sent message to ${successfulSends} out of ${phoneNumbers.length} subscribers.` });
 
   } catch (error) {
     console.error('Send message API error:', error);

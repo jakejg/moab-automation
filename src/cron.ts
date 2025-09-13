@@ -12,7 +12,8 @@ export async function runDailyNotification() {
     if (isUpdated) {
       if (lunchMessage && phoneNumbers.length > 0) {
         // 2. Send messages to all numbers
-        await sendMessages(phoneNumbers, lunchMessage);
+        const moonflowerBusinessId = 'g0OGnuWAPatvakhNy3To'; // Hardcoded for now
+        await sendMessages(phoneNumbers, lunchMessage, moonflowerBusinessId);
         console.log('Daily notification completed successfully');
       } else if (phoneNumbers.length === 0) {
         console.log('No phone numbers found in the sheet. No messages sent.');

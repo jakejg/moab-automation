@@ -24,6 +24,7 @@ async function getSecret(secretName: string): Promise<string | undefined> {
     process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL = await getSecret('GOOGLE_SERVICE_ACCOUNT_EMAIL');
     process.env.GOOGLE_PRIVATE_KEY = await getSecret('GOOGLE_PRIVATE_KEY');
     process.env.TWILIO_PHONE_NUMBER = await getSecret('TWILIO_PHONE_NUMBER');
+    process.env.FIREBASE_PROJECT_ID = await getSecret('FIREBASE_PROJECT_ID');
 
     console.log('Secrets successfully loaded.');
 

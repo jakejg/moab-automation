@@ -1,6 +1,7 @@
 import twilio from 'twilio';
+import { logSMS } from './analytics';
 
-export async function sendMessages(phoneNumbers: string[], message: string): Promise<void> {
+export async function sendMessages(phoneNumbers: string[], message: string, businessId: string): Promise<void> {
   const client = twilio(
     process.env.TWILIO_ACCOUNT_SID,
     process.env.TWILIO_AUTH_TOKEN
@@ -15,8 +16,9 @@ export async function sendMessages(phoneNumbers: string[], message: string): Pro
   );
 
   try {
-    await Promise.all(sendPromises);
-    console.log(`Successfully sent messages to ${phoneNumbers.length} recipients`);
+    const results = await Promise.allSettled(sendPromises);
+    const successfulSends = await logSMS(businessId, results);
+    console.log(`Successfully sent and logged ${successfulSends} out of ${phoneNumbers.length} messages`);
   } catch (error) {
     console.error('Error sending messages:', error);
     throw error;
