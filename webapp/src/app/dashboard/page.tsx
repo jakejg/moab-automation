@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 
 const DashboardPage = () => {
   const { data: session, status: sessionStatus } = useSession();
@@ -61,11 +62,16 @@ const DashboardPage = () => {
       <div className="relative z-10 max-w-2xl w-full bg-white/10 backdrop-blur-md p-8 rounded-2xl shadow-xl">
         {session?.user?.logoUrl && (
           <div className="flex justify-center mb-6">
-            <img
-              src={session.user.logoUrl}
-              alt="Business Logo"
-              className="h-28 w-auto rounded-2xl object-contain"
-            />
+            <div className="relative w-40 h-28">
+              <Image
+                src={session.user.logoUrl}
+                alt="Business Logo"
+                width={200}
+                height={200}
+                priority
+                style={ { borderRadius: '50px'} }
+              />
+            </div>
           </div>
         )}
         <h1 className="text-3xl font-bold text-white mb-8 text-center">Send a Message to Your Subscribers</h1>
