@@ -1,10 +1,13 @@
 import { calendar_v3, google } from 'googleapis';
-import { toZonedTime, toDate, format } from 'date-fns-tz';
+import { toZonedTime, format } from 'date-fns-tz';
 import Schema$TimePeriod = calendar_v3.Schema$TimePeriod;
 
 import { JWT } from 'google-auth-library';
 
-const SCOPES = ['https://www.googleapis.com/auth/calendar.readonly'];
+const SCOPES = [
+  'https://www.googleapis.com/auth/calendar.readonly',
+  'https://www.googleapis.com/auth/calendar.events'
+];
 
 const privateKey = process.env.GOOGLE_PRIVATE_KEY_CALENDAR?.replace(/\\n/g, '\n');
 
@@ -24,12 +27,12 @@ interface BookingWindow {
 
 export async function findEarliestAvailability(
   calendarIds: { id: string }[],
-  durationMinutes: number = 60,
-  timezone: string = 'America/Denver',
+  durationMinutes = 60,
+  timezone = 'America/Denver',
   bookingWindowStart: BookingWindow = {hour: 8, minute: 0},
   bookingWindowEnd: BookingWindow = {hour: 17, minute: 0},
-  intervalMinutes: number = 60,
-  numberOfSlots: number = 2, // Number of slots to find for each calendar
+  intervalMinutes = 60,
+  numberOfSlots = 2, // Number of slots to find for each calendar
   timeMin: string,
   timeMax: string
 
@@ -159,8 +162,11 @@ function getEarliestSlot(
     }
 
     const isBusy = busySlots.some(busy => {
-      const busyStart = toZonedTime(new Date(busy.start!), timezone);
-      const busyEnd = toZonedTime(new Date(busy.end!), timezone);
+      if (!busy.start || !busy.end) {
+        return false;
+      }
+      const busyStart = toZonedTime(new Date(busy.start), timezone);
+      const busyEnd = toZonedTime(new Date(busy.end), timezone);
       // Check for overlap: (StartA < EndB) and (EndA > StartB)
       return slotStart < busyEnd && slotEnd > busyStart;
     });
