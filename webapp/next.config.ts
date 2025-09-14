@@ -8,7 +8,7 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'moonflower.coop',
         port: '',
-        pathname: '/wp-content/uploads/**',
+        pathname: '/**',
       },
     ],
   },
