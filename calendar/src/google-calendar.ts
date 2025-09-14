@@ -89,7 +89,17 @@ export async function findEarliestAvailability(
     }
 
   openSlots.sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime());
-  return openSlots;
+
+  const humanReadableSlots = openSlots.map(slot => {
+    const formatString = "EEEE, MMMM d, yyyy h:mm a";
+    return {
+      calendarId: slot.calendarId,
+      startTime: format(toZonedTime(slot.startTime, timezone), formatString, { timeZone: timezone }),
+      endTime: format(toZonedTime(slot.endTime, timezone), formatString, { timeZone: timezone }),
+    };
+  });
+
+  return humanReadableSlots;
 }
 
 
