@@ -8,7 +8,7 @@ export async function runDailyNotification() {
   try {
     // 1. Get phone numbers and lunch info from Google Sheets
     const { phoneNumbers, lunchMessage, isUpdated } = await getSheetData();
-     /** TESTING **
+
     if (isUpdated) {
       if (lunchMessage && phoneNumbers.length > 0) {
         // 2. Send messages to all numbers
@@ -24,7 +24,7 @@ export async function runDailyNotification() {
     } else {
       console.log('Menu is not updated for the current date. No messages will be sent.');
     }
-    */
+    
   } catch (error) {
     console.error('Error in daily notification:', error);
   }
