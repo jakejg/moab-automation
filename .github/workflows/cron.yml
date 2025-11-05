@@ -2,33 +2,60 @@ name: moonflower-lunch
 
 on:
   schedule:
-    - cron: '50 17 * * *'  # Runs every day at 11:50 MDT
-  workflow_dispatch:  # Allows manual triggering
+    - cron: '50 17 * * *'  # Triggers at 17:50 UTC (11:50 AM MDT)
+    - cron: '50 18 * * *'  # Triggers at 18:50 UTC (11:50 AM MST)
+  workflow_dispatch:      # Allows manual triggering for testing
 
 jobs:
-  run-cron:
+  # JOB 1: THE GATEKEEPER
+  # This job runs first and decides if the main job should proceed.
+  time-check-gate:
     runs-on: ubuntu-latest
+    # This 'outputs' section makes the result of this job available to other jobs.
+    outputs:
+      proceed: ${{ steps.time-check.outputs.proceed }}
+    steps:
+      - name: Check if it is the correct time to run
+        id: time-check
+        run: |
+          TARGET_HOUR=$(TZ='America/Denver' date +'%H')
+          if [[ "$TARGET_HOUR" == "11" ]]; then
+            echo "✅ SUCCESS: The hour is 11 in Denver. The main job will run."
+            echo "proceed=true" >> $GITHUB_OUTPUT
+          else
+            echo "❌ SKIPPED: The hour is not 11 in Denver. The main job will be skipped."
+            echo "proceed=false" >> $GITHUB_OUTPUT
+          fi
 
+  # JOB 2: THE MAIN JOB
+  # This job contains all your actual logic and only runs if the gatekeeper job succeeds.
+  run-cron:
+    # 'needs' ensures that this job waits for 'time-check-gate' to finish.
+    needs: time-check-gate
+    # This is the single 'if' condition that controls the entire job!
+    if: needs.time-check-gate.outputs.proceed == 'true'
+    
+    runs-on: ubuntu-latest
     env:
-      LUNCH_PAGE_URL: ${{ vars.LUNCH_PAGE_URL }}  # Non-sensitive variable
+      LUNCH_PAGE_URL: ${{ vars.LUNCH_PAGE_URL }}
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4  # Access repo files
+        uses: actions/checkout@v4
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20  # Adjust to your Node.js version
+          node-version: 20
 
       - name: Install dependencies
-        run: npm install  # Installs packages from package.json
+        run: npm install
 
       - name: Compile TypeScript
-        run: npx tsc 
+        run: npx tsc
 
       - name: Run cron script
-        env:  # Pass secrets only for this step
+        env:
           GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}
           GOOGLE_SERVICE_ACCOUNT_EMAIL: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_EMAIL }}
           GOOGLE_PRIVATE_KEY: ${{ secrets.GOOGLE_PRIVATE_KEY }}
