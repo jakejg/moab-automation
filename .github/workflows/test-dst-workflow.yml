@@ -1,0 +1,64 @@
+# A descriptive name that will appear in the GitHub Actions UI
+name: Test DST-Aware Scheduler
+
+# This 'on' block specifies what triggers the workflow.
+on:
+  # 'workflow_dispatch' makes the "Run workflow" button appear in the Actions tab.
+  # This is perfect for manual testing.
+  workflow_dispatch:
+    inputs:
+      # This defines an input field that will appear in the GitHub UI.
+      # It allows you to simulate any hour to test the logic.
+      test_hour:
+        description: 'Simulate an hour (0-23) for the time check. Leave empty to use real time.'
+        required: false
+        default: '' # Default to an empty string
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel.
+jobs:
+  # We'll define a single job for this test.
+  test-the-scheduler:
+    # The type of runner that the job will run on. 'ubuntu-latest' is a standard choice.
+    runs-on: ubuntu-latest
+
+    # 'steps' represent a sequence of tasks that will be executed as part of the job.
+    steps:
+      # Step 1: The "Gatekeeper". This step always runs and decides if the main job should proceed.
+      - name: 1. Check if it is the correct time to run
+        id: time-check # An ID is given to this step so its outputs can be referenced later.
+        run: |
+          # This command checks for the user-provided 'test_hour'. If it's empty, it falls back
+          # to getting the actual current hour in the 'America/Denver' timezone.
+          TARGET_HOUR="${{ github.event.inputs.test_hour || $(TZ='America/Denver' date +'%H') }}"
+
+          echo "----------------------------------------------------"
+          echo "Input 'test_hour' from UI: '${{ github.event.inputs.test_hour }}'"
+          echo "Timezone for check: America/Denver"
+          echo "Final hour being checked: $TARGET_HOUR"
+          echo "----------------------------------------------------"
+
+          # The core logic: We want the job to run at 11:50 AM, so we check if the hour is 11.
+          if [[ "$TARGET_HOUR" == "11" ]]; then
+            echo "✅ SUCCESS: The hour is 11. The main job is cleared to run."
+            # Set an output variable for the following steps to use.
+            echo "proceed=true" >> $GITHUB_OUTPUT
+          else
+            echo "❌ SKIPPED: The hour is NOT 11. The main job will be skipped."
+            echo "proceed=false" >> $GITHUB_OUTPUT
+          fi
+
+      # Step 2: The Main Job. This step is conditional and simulates your real task.
+      - name: 2. Run Main Job Logic
+        # This 'if' condition is the key. It reads the output from the 'time-check' step.
+        # The step will ONLY run if 'proceed' was set to 'true'.
+        if: steps.time-check.outputs.proceed == 'true'
+        run: |
+          echo "🚀 Main job is running! This is where your actual script or commands would go."
+
+      # Step 3: A helper step to give clear feedback when a job is skipped.
+      - name: 3. Confirm Job was Intentionally Skipped
+        # This step runs ONLY if the 'proceed' flag was 'false'.
+        # This makes the test results in the logs very easy to understand.
+        if: steps.time-check.outputs.proceed == 'false'
+        run: |
+          echo "➡️ The main job was correctly skipped as per the time check logic. Test successful."
