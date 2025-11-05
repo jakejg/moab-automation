@@ -102,6 +102,83 @@ function isMenuUpdated(dateStringFromSheet: string): boolean {
   return sheetDate.getTime() === currentDate.getTime();
 }
 
+export async function removePhoneNumber(phoneNumberToRemove: string): Promise<boolean> {
+  try {
+    const SCOPES = [
+      'https://www.googleapis.com/auth/spreadsheets',
+      'https://www.googleapis.com/auth/drive.file',
+    ];
+
+    const privateKey = process.env.GOOGLE_PRIVATE_KEY!.replace(/\\n/g, '\n');
+    const jwt = new JWT({
+      email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
+      key: privateKey,
+      scopes: SCOPES,
+    });
+
+    const doc = new GoogleSpreadsheet(process.env.GOOGLE_SHEET_ID!, jwt);
+    await doc.loadInfo();
+
+    const sheet = doc.sheetsByIndex[0];
+    const rows = await sheet.getRows();
+
+
+    // Find the row to delete
+    // Normalize the incoming phone number from Twilio (E.164 format) to match the sheet format
+    const normalizedPhoneNumber = phoneNumberToRemove.startsWith('+1')
+      ? phoneNumberToRemove.slice(2)
+      : phoneNumberToRemove;
+
+    const rowToDelete = rows.find(row => row.get('phoneNumber') === normalizedPhoneNumber);
+
+    if (!rowToDelete) {
+      console.log(`Phone number ${phoneNumberToRemove} not found.`);
+      return false;
+    }
+
+    // Get column index from header
+    await sheet.loadHeaderRow();
+    const phoneNumberColIndex = sheet.headerValues.indexOf('phoneNumber');
+
+    if (phoneNumberColIndex === -1) {
+      console.error('"phoneNumber" column not found.');
+      return false;
+    }
+
+    // Prepare the batchUpdate request to delete the cell and shift others up
+    const request = {
+      requests: [
+        {
+          deleteRange: {
+            range: {
+              sheetId: sheet.sheetId,
+              startRowIndex: rowToDelete.rowNumber - 1, // rowNumber is 1-based, API is 0-based
+              endRowIndex: rowToDelete.rowNumber,
+              startColumnIndex: phoneNumberColIndex,
+              endColumnIndex: phoneNumberColIndex + 1,
+            },
+            shiftDimension: 'ROWS',
+          },
+        },
+      ],
+    };
+
+    // Make the raw API request using the authenticated JWT client
+    await jwt.request({
+      url: `https://sheets.googleapis.com/v4/spreadsheets/${doc.spreadsheetId}:batchUpdate`,
+      method: 'POST',
+      data: request,
+    });
+
+    console.log(`Phone number ${phoneNumberToRemove} removed successfully.`);
+    return true;
+
+  } catch (error) {
+    console.error('Error removing phone number from sheet:', error);
+    throw error;
+  }
+}
+
 // Keeping this for backward compatibility
 export async function getPhoneNumbers(): Promise<string[]> {
   const data = await getSheetData();

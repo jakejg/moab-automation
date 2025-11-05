@@ -42,27 +42,27 @@ steps:
           --source=. \
           --set-secrets=CALENDAR_API_KEY=$$API_KEY_SECRET:latest,GOOGLE_SERVICE_ACCOUNT_CALENDAR_EMAIL=GOOGLE_SERVICE_ACCOUNT_CALENDAR_EMAIL:latest,GOOGLE_PRIVATE_KEY_CALENDAR=GOOGLE_PRIVATE_KEY_CALENDAR:latest
 
-# # Step 1: Deploy the 'sms' Cloud Function (existing step)
-#   - name: 'gcr.io/cloud-builders/npm'
-#     id: 'Install dependencies for SMS function'
-#     args: ['install']
+# Step 1: Deploy the 'sms' Cloud Function (existing step)
+  - name: 'gcr.io/cloud-builders/npm'
+    id: 'Install dependencies for SMS function'
+    args: ['install']
 
-#   - name: 'gcr.io/cloud-builders/npm'
-#     id: 'Build SMS function'
-#     args: ['run', 'build']
+  - name: 'gcr.io/cloud-builders/npm'
+    id: 'Build SMS function'
+    args: ['run', 'build']
 
-#   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-#     id: 'Deploy SMS function'
-#     entrypoint: 'bash'
-#     args:
-#       - '-c'
-#       - |
-#         gcloud functions deploy sms \
-#           --entry-point=sms \
-#           --runtime=nodejs20 \
-#           --trigger-http \
-#           --allow-unauthenticated \
-#           --service-account=moonflower-453318@appspot.gserviceaccount.com
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    id: 'Deploy SMS function'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        gcloud functions deploy sms \
+          --entry-point=sms \
+          --runtime=nodejs20 \
+          --trigger-http \
+          --allow-unauthenticated \
+          --service-account=moonflower-453318@appspot.gserviceaccount.com
 
  # Step 2: Build and deploy the Next.js web application
   - name: 'gcr.io/cloud-builders/docker'
