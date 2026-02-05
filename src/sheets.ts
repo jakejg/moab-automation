@@ -13,7 +13,7 @@ export async function getSheetData(): Promise<SheetData> {
       'https://www.googleapis.com/auth/spreadsheets',
       'https://www.googleapis.com/auth/drive.file',
     ];
-    
+
     // Handle the private key properly by replacing escaped newlines
     const privateKey = process.env.GOOGLE_PRIVATE_KEY!.replace(/\\n/g, '\n');
 
@@ -29,7 +29,7 @@ export async function getSheetData(): Promise<SheetData> {
 
     const sheet = doc.sheetsByIndex[0];
     const rows = await sheet.getRows();
-    
+
     // Get phone numbers and lunch info from the sheet
     const phoneNumbers = rows.map(row => row.get('phoneNumber')).filter(Boolean);
     const lunchInfo = rows.map(row => row.get('lunchInfo'));
@@ -65,23 +65,32 @@ function isMenuUpdated(dateStringFromSheet: string): boolean {
     return false;
   }
 
-  // Example dateStringFromSheet: "Tuesday 5/6/25"
-  // We need to parse out "5/6/25"
-  const datePart = dateStringFromSheet.split(' ')[1];
-  if (!datePart) {
-    console.log('Could not parse date part from sheet string:', dateStringFromSheet);
+  // Extract date part - handle both "Tuesday 5/6/25" and "05/6/25" formats
+  // Look for a pattern like M/D/YY or MM/DD/YY anywhere in the string
+  const datePattern = /(\d{1,2}\/\d{1,2}\/\d{2,4})/;
+  const match = dateStringFromSheet.match(datePattern);
+
+  if (!match) {
+    console.log('Could not find a valid date pattern in:', dateStringFromSheet);
     return false;
   }
 
+  const datePart = match[1];
   const parts = datePart.split('/');
+
   if (parts.length !== 3) {
-    console.log('Date part from sheet is not in MM/DD/YY format:', datePart);
+    console.log('Date part is not in MM/DD/YY format:', datePart);
     return false;
   }
 
   const month = parseInt(parts[0], 10);
   const day = parseInt(parts[1], 10);
-  const year = parseInt(parts[2], 10) + 2000; // Assuming YY is for 20YY
+  let year = parseInt(parts[2], 10);
+
+  // Handle both 2-digit and 4-digit years
+  if (year < 100) {
+    year += 2000; // Assuming YY is for 20YY
+  }
 
   if (isNaN(month) || isNaN(day) || isNaN(year)) {
     console.log('Could not parse month, day, or year from date part:', datePart);
@@ -94,7 +103,7 @@ function isMenuUpdated(dateStringFromSheet: string): boolean {
   const currentDate = new Date();
   currentDate.setHours(0, 0, 0, 0);
 
-  sheetDate.setHours(0,0,0,0); // Also normalize sheet date to midnight
+  sheetDate.setHours(0, 0, 0, 0); // Also normalize sheet date to midnight
 
   console.log('Sheet Date:', sheetDate.toDateString());
   console.log('Current Date:', currentDate.toDateString());

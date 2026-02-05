@@ -36,7 +36,7 @@ steps:
 
         gcloud functions deploy $$FUNCTION_NAME \
           --entry-point=calendar \
-          --runtime=nodejs20 \
+          --runtime=nodejs22 \
           --trigger-http \
           --allow-unauthenticated \
           --source=. \
@@ -59,7 +59,7 @@ steps:
       - |
         gcloud functions deploy sms \
           --entry-point=sms \
-          --runtime=nodejs20 \
+          --runtime=nodejs22 \
           --trigger-http \
           --allow-unauthenticated \
           --service-account=moonflower-453318@appspot.gserviceaccount.com
