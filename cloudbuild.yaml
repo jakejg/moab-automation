@@ -144,7 +144,8 @@ steps:
           --image=us-central1-docker.pkg.dev/$PROJECT_ID/webapp-repo/lunch-cron:$COMMIT_SHA \
           --region=us-central1 \
           --service-account=moonflower-453318@appspot.gserviceaccount.com \
-          --set-secrets=GOOGLE_SHEET_ID=GOOGLE_SHEET_ID:latest,GOOGLE_SERVICE_ACCOUNT_EMAIL=GOOGLE_SERVICE_ACCOUNT_EMAIL:latest,GOOGLE_PRIVATE_KEY=GOOGLE_PRIVATE_KEY:latest,TWILIO_ACCOUNT_SID=TWILIO_ACCOUNT_SID:latest,TWILIO_AUTH_TOKEN=TWILIO_AUTH_TOKEN:latest,TWILIO_PHONE_NUMBER=TWILIO_PHONE_NUMBER:latest
+          --set-secrets=GOOGLE_SHEET_ID=GOOGLE_SHEET_ID:latest,GOOGLE_SERVICE_ACCOUNT_EMAIL=GOOGLE_SERVICE_ACCOUNT_EMAIL:latest,GOOGLE_PRIVATE_KEY=GOOGLE_PRIVATE_KEY:latest,TWILIO_ACCOUNT_SID=TWILIO_ACCOUNT_SID:latest,TWILIO_AUTH_TOKEN=TWILIO_AUTH_TOKEN:latest,TWILIO_PHONE_NUMBER=TWILIO_PHONE_NUMBER:latest \
+          --set-env-vars=TZ=America/Denver
 
 # Tell Cloud Build to push the built image to Artifact Registry
 images:
