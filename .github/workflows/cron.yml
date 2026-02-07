@@ -21,7 +21,7 @@ jobs:
           TARGET_HOUR=$(TZ='America/Denver' date +'%H')
           TARGET_MINUTE=$(TZ='America/Denver' date +'%M')
           # Allow runs between 11:50 AM and 12:15 PM to handle GitHub Actions delays
-          if [[ "$TARGET_HOUR" == "11" && "$TARGET_MINUTE" -ge "50" ]] || [[ "$TARGET_HOUR" == "12" && "$TARGET_MINUTE" -le "15" ]]; then
+          if [[ "$TARGET_HOUR" == "11" && 10#$TARGET_MINUTE -ge 50 ]] || [[ "$TARGET_HOUR" == "12" && 10#$TARGET_MINUTE -le 15 ]]; then
             echo "✅ SUCCESS: Within time window (11:50-12:15 Denver). The main job will run."
             echo "proceed=true" >> $GITHUB_OUTPUT
           else
@@ -48,7 +48,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
 
       - name: Install dependencies
         run: npm install

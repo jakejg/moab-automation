@@ -117,9 +117,39 @@ steps:
           --set-secrets=TWILIO_ACCOUNT_SID=$$TWILIO_SID_SECRET:latest,TWILIO_AUTH_TOKEN=$$TWILIO_TOKEN_SECRET:latest,NEXTAUTH_SECRET=NEXTAUTH_SECRET:latest,NEXT_PUBLIC_FIREBASE_CONFIG=NEXT_PUBLIC_FIREBASE_CONFIG:latest,FIREBASE_CLIENT_EMAIL=FIREBASE_CLIENT_EMAIL:latest,FIREBASE_PRIVATE_KEY=FIREBASE_PRIVATE_KEY:latest,GOOGLE_SHEET_ID=GOOGLE_SHEET_ID:latest,GOOGLE_SERVICE_ACCOUNT_EMAIL=GOOGLE_SERVICE_ACCOUNT_EMAIL:latest,GOOGLE_PRIVATE_KEY=GOOGLE_PRIVATE_KEY:latest \
           --set-env-vars=NEXT_PUBLIC_FIREBASE_PROJECT_ID=moonflower-453318,NEXTAUTH_URL=$$SERVICE_URL,NEXT_PUBLIC_URL=$$SERVICE_URL
 
+# Step 3: Build and deploy the lunch cron job
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'Build cron job container image'
+    args:
+      - 'build'
+      - '-f'
+      - 'Dockerfile.cron'
+      - '-t'
+      - 'us-central1-docker.pkg.dev/$PROJECT_ID/webapp-repo/lunch-cron:$COMMIT_SHA'
+      - '-t'
+      - 'us-central1-docker.pkg.dev/$PROJECT_ID/webapp-repo/lunch-cron:latest'
+      - '.'
+
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'Push cron job container image'
+    args: ['push', '--all-tags', 'us-central1-docker.pkg.dev/$PROJECT_ID/webapp-repo/lunch-cron']
+
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    id: 'Deploy lunch cron job'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        gcloud run jobs deploy lunch-cron \
+          --image=us-central1-docker.pkg.dev/$PROJECT_ID/webapp-repo/lunch-cron:$COMMIT_SHA \
+          --region=us-central1 \
+          --service-account=moonflower-453318@appspot.gserviceaccount.com \
+          --set-secrets=GOOGLE_SHEET_ID=GOOGLE_SHEET_ID:latest,GOOGLE_SERVICE_ACCOUNT_EMAIL=GOOGLE_SERVICE_ACCOUNT_EMAIL:latest,GOOGLE_PRIVATE_KEY=GOOGLE_PRIVATE_KEY:latest,TWILIO_ACCOUNT_SID=TWILIO_ACCOUNT_SID:latest,TWILIO_AUTH_TOKEN=TWILIO_AUTH_TOKEN:latest,TWILIO_PHONE_NUMBER=TWILIO_PHONE_NUMBER:latest
+
 # Tell Cloud Build to push the built image to Artifact Registry
 images:
   - 'us-central1-docker.pkg.dev/$PROJECT_ID/webapp-repo/moab-automation-webapp:$COMMIT_SHA'
+  - 'us-central1-docker.pkg.dev/$PROJECT_ID/webapp-repo/lunch-cron:$COMMIT_SHA'
 
 options:
   logging: CLOUD_LOGGING_ONLY

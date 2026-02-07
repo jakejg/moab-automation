@@ -1,5 +1,5 @@
 # 1. Install dependencies
-FROM node:20-slim AS deps
+FROM node:22-slim AS deps
 WORKDIR /app
 
 
@@ -10,7 +10,7 @@ COPY package.json ./
 RUN npm install
 
 # 2. Build the application
-FROM node:20-slim AS builder
+FROM node:22-slim AS builder
 WORKDIR /app
 
 # Client-side Firebase config
@@ -39,7 +39,7 @@ ENV NEXT_TELEMETRY_DISABLED 1
 RUN npm run build
 
 # 3. Production image
-FROM node:20-slim AS runner
+FROM node:22-slim AS runner
 WORKDIR /app
 
 # Set NEXT_TELEMETRY_DISABLED to 1 for the production environment
