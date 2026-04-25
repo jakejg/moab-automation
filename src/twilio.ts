@@ -15,7 +15,13 @@ export async function sendMessages(phoneNumbers: string[], message: string): Pro
   );
 
   try {
-    await Promise.all(sendPromises);
+    const results = await Promise.allSettled(sendPromises);
+
+    const successes = results.filter(r => r.status === 'fulfilled');
+    const failures = results.filter(r => r.status === 'rejected');
+
+    console.log(`Sent: ${successes.length}`);
+    console.log(`Failed: ${failures.length}`);
     console.log(`Successfully sent messages to ${phoneNumbers.length} recipients`);
   } catch (error) {
     console.error('Error sending messages:', error);

@@ -29,11 +29,11 @@ export async function POST(request: Request) {
     const twilioClient = getTwilioClient();
     const { message } = await request.json();
     const session = await getServerSession(authOptions);
-    
+
     // 1. Validate request
     if (!message) {
       return NextResponse.json(
-        { message: 'Message is required.' }, 
+        { message: 'Message is required.' },
         { status: 400 }
       );
     }
@@ -48,7 +48,7 @@ export async function POST(request: Request) {
 
     const user = session.user as SessionUser;
     const businessId = user.businessId;
-    
+
     if (!businessId) {
       return NextResponse.json(
         { message: 'No business associated with this account.' },
@@ -59,16 +59,16 @@ export async function POST(request: Request) {
 
     // 3. Verify business exists
     const businessDoc = await firestore.collection('businesses').doc(businessId).get();
-    
+
     if (!businessDoc.exists) {
       return NextResponse.json(
-        { message: 'Business not found.' }, 
+        { message: 'Business not found.' },
         { status: 404 }
       );
     }
 
     const businessData = businessDoc.data();
-    
+
     if (!businessData) {
       return NextResponse.json(
         { message: 'Business data is corrupted.' },
@@ -98,7 +98,7 @@ export async function POST(request: Request) {
       .get();
 
     let phoneNumbers: string[] = [];
-    
+
     /********** Custom logic for moonflower **********/
     if (businessId === 'g0OGnuWAPatvakhNy3To') {
       const sheetData = await getSheetData();
@@ -120,7 +120,14 @@ export async function POST(request: Request) {
       })
     );
 
-    await Promise.all(sendPromises);
+
+    const results = await Promise.allSettled(sendPromises);
+    const successes = results.filter(r => r.status === 'fulfilled');
+    const failures = results.filter(r => r.status === 'rejected');
+
+    console.log(`Sent: ${successes.length}`);
+    console.log(`Failed: ${failures.length}`);
+    console.log(`Successfully sent messages to ${phoneNumbers.length} recipients`);
 
     return NextResponse.json({ message: `Successfully sent message to ${phoneNumbers.length} subscribers.` });
 
